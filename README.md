@@ -1,5 +1,5 @@
 # Book2ball
-*"Slogan"*
+*"Reserve Your Field, Play Your Game"*
 ### Contributors
 Ayoub Elazzouzi ([]()) - UI/UX Design  
 Khalil Harir ([@khalilharir](https://github.com/khalilharir)) - UI/UX Design  
