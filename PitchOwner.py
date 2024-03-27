@@ -37,6 +37,26 @@ def handle_post(req: func.HttpRequest, PitchOwnersPost: func.Out[func.SqlRow]) -
     try:
         req_body = req.get_json()
         # Validate and process the request body
+        if 'Name' not in req_body:
+            return func.HttpResponse(
+                "Missing required field: Name",
+                status_code=400
+            )
+        if 'Email' not in req_body:
+            return func.HttpResponse(
+                "Missing required field: Email",
+                status_code=400
+            )
+        if 'Phone' not in req_body:
+            return func.HttpResponse(
+                "Missing required field: Phone",
+                status_code=400
+            )
+        if 'Address' not in req_body:
+            return func.HttpResponse(
+                "Missing required field: Address",
+                status_code=400
+            )
         # Save the new pitch owner to the database
         new_pitch_owner = PitchOwnersPost.set(func.SqlRow(req_body))    
         return func.HttpResponse(

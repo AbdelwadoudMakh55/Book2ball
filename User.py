@@ -37,6 +37,26 @@ def handle_post(req: func.HttpRequest, UsersPost: func.Out[func.SqlRow]) -> func
     try:
         req_body = req.get_json()
         # Validate and process the request body
+        if 'Name' not in req_body:
+            return func.HttpResponse(
+                "Missing required field: Name",
+                status_code=400
+            )
+        if 'Email' not in req_body:
+            return func.HttpResponse(
+                "Missing required field: Email",
+                status_code=400
+            )
+        if 'Phone' not in req_body:
+            return func.HttpResponse(
+                "Missing required field: Phone",
+                status_code=400
+            )
+        if 'Address' not in req_body:
+            return func.HttpResponse(
+                "Missing required field: Address",
+                status_code=400
+            )
         # Save the new user to the database
         new_user = UsersPost.set(func.SqlRow(req_body))
         return func.HttpResponse(

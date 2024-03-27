@@ -37,6 +37,36 @@ def handle_post(req: func.HttpRequest, ReservationsPost: func.Out[func.SqlRow]) 
     try:
         req_body = req.get_json()
         # Validate and process the request body
+        if 'PitchId' not in req_body:
+            return func.HttpResponse(
+                "Missing required field: PitchId",
+                status_code=400
+            )
+        if 'UserID' not in req_body:
+            return func.HttpResponse(
+                "Missing required field: UserID",
+                status_code=400
+            )
+        if 'StartTime' not in req_body:
+            return func.HttpResponse(
+                "Missing required field: StartTime",
+                status_code=400
+            )
+        if 'StartTime' not in req_body:
+            return func.HttpResponse(
+                "Missing required field: EndTime",
+                status_code=400
+            )
+        if 'EndTime' not in req_body:
+            return func.HttpResponse(
+                "Missing required field: EndTime",
+                status_code=400
+            )
+        if 'Status' not in req_body:
+            return func.HttpResponse(
+                "Missing required field: Status",
+                status_code=400
+            )
         # Save the new reservation to the database
         new_reservation = ReservationsPost.set(func.SqlRow(req_body))
         return func.HttpResponse(

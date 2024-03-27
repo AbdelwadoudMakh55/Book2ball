@@ -37,6 +37,36 @@ def handle_post(req: func.HttpRequest, PitchesPost: func.Out[func.SqlRow]) -> fu
     try:
         req_body = req.get_json()
         # Validate and process the request body
+        if 'Name' not in req_body:
+            return func.HttpResponse(
+                "Missing required field: Name",
+                status_code=400
+            )
+        if 'Location' not in req_body:
+            return func.HttpResponse(
+                "Missing required field: Location",
+                status_code=400
+            )
+        if 'Type' not in req_body:
+            return func.HttpResponse(
+                "Missing required field: Type",
+                status_code=400
+            )
+        if 'Capacity' not in req_body:
+            return func.HttpResponse(
+                "Missing required field: Capacity",
+                status_code=400
+            )
+        if 'Availability' not in req_body:
+            return func.HttpResponse(
+                "Missing required field: Availability",
+                status_code=400
+            )
+        if 'PitchOwnerID' not in req_body:
+            return func.HttpResponse(
+                "Missing required field: PitchOwnerID",
+                status_code=400
+            )
         # Save the new pitch to the database
         new_pitch = PitchesPost.set(func.SqlRow(req_body))
         return func.HttpResponse(

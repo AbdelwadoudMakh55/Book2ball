@@ -37,6 +37,26 @@ def handle_post(req: func.HttpRequest, ReviewsPost: func.Out[func.SqlRow]) -> fu
     try:
         req_body = req.get_json()
         # Validate and process the request body
+        if 'RerservationID' not in req_body:
+            return func.HttpResponse(
+                "Missing required field: ReservationID",
+                status_code=400
+            )
+        if 'Rating' not in req_body:
+            return func.HttpResponse(
+                "Missing required field: Rating",
+                status_code=400
+            )
+        if 'Comment' not in req_body:
+            return func.HttpResponse(
+                "Missing required field: Comment",
+                status_code=400
+            )
+        if 'Date' not in req_body:
+            return func.HttpResponse(
+                "Missing required field: Date",
+                status_code=400
+            )
         # Save the new review to the database
         new_review = ReviewsPost.set(func.SqlRow(req_body))
         return func.HttpResponse(
