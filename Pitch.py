@@ -5,14 +5,16 @@ bp_pitches = func.Blueprint()
 @bp_pitches.route('pitches', methods=['GET', 'POST'])
 @bp_pitches.generic_input_binding(arg_name="Pitches", type="sql", CommandText="SELECT * FROM dbo.Pitch",
                                   ConnectionStringSetting="SqlConnectionString")
-def pitch(req: func.HttpRequest, Pitches: func.SqlRowList) -> func.HttpResponse:
+@bp_pitches.generic_output_binding(arg_name="PitchesPost", type="sql", CommandText="dbo.Pitch",
+                                   ConnectionStringSetting="SqlConnectionString")
+def pitch(req: func.HttpRequest, Pitches: func.SqlRowList, PitchesPost: func.Out[func.SqlRow]) -> func.HttpResponse:
     method = req.method
     if method == 'GET':
         # Handle GET request
         return handle_get(req, Pitches)
     elif method == 'POST':
         # Handle POST request
-        return handle_post(req)
+        return handle_post(req, PitchesPost)
     else:
         return func.HttpResponse(
             "Method not allowed",
@@ -21,7 +23,7 @@ def pitch(req: func.HttpRequest, Pitches: func.SqlRowList) -> func.HttpResponse:
 
 def handle_get(req: func.HttpRequest, Pitches: func.SqlRowList) -> func.HttpResponse:
     # Logic for handling GET request
-    # Retrieve pitches from database or any other data source
+    # Retrieve pitches from database
     pitches = list(map(lambda r: json.loads(r.to_json()), Pitches))
     return func.HttpResponse(
         body=json.dumps(pitches),
@@ -29,21 +31,21 @@ def handle_get(req: func.HttpRequest, Pitches: func.SqlRowList) -> func.HttpResp
         status_code=200
     )
 
-def handle_post(req: func.HttpRequest) -> func.HttpResponse:
+def handle_post(req: func.HttpRequest, PitchesPost: func.Out[func.SqlRow]) -> func.HttpResponse:
     # Logic for handling POST request
     # Parse the request body
     try:
         req_body = req.get_json()
         # Validate and process the request body
-        # Save the new pitch to the database or any other data source
-        new_pitch = {"id": 4, "name": "Pitch 4"}
+        # Save the new pitch to the database
+        new_pitch = PitchesPost.set(func.SqlRow(req_body))
         return func.HttpResponse(
-            body=json.dumps(new_pitch),
+            body=json.dumps(req_body),
             mimetype="application/json",
             status_code=201
         )
-    except ValueError:
+    except ValueError as e:
         return func.HttpResponse(
-            "Invalid request body",
+            f"Invalid request body: {e}",
             status_code=400
         )

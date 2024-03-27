@@ -5,14 +5,16 @@ bp_users = func.Blueprint()
 @bp_users.route('users', methods=['GET', 'POST'])
 @bp_users.generic_input_binding(arg_name="Users", type="sql", CommandText="SELECT * FROM dbo.[User]",
                                 ConnectionStringSetting="SqlConnectionString")
-def user(req: func.HttpRequest, Users: func.SqlRowList) -> func.HttpResponse:
+@bp_users.generic_output_binding(arg_name="UsersPost", type="sql", CommandText="dbo.[User]",
+                                 ConnectionStringSetting="SqlConnectionString")
+def user(req: func.HttpRequest, Users: func.SqlRowList, UsersPost: func.Out[func.SqlRow]) -> func.HttpResponse:
     method = req.method
     if method == 'GET':
         # Handle GET request
         return handle_get(req, Users)
     elif method == 'POST':
         # Handle POST request
-        return handle_post(req)
+        return handle_post(req, UsersPost)
     else:
         return func.HttpResponse(
             "Method not allowed",
@@ -21,7 +23,7 @@ def user(req: func.HttpRequest, Users: func.SqlRowList) -> func.HttpResponse:
     
 def handle_get(req: func.HttpRequest, Users: func.SqlRowList) -> func.HttpResponse:
     # Logic for handling GET request
-    # Retrieve users from database or any other data source
+    # Retrieve users from database
     users = list(map(lambda r: json.loads(r.to_json()), Users))
     return func.HttpResponse(
         body=json.dumps(users),
@@ -29,16 +31,16 @@ def handle_get(req: func.HttpRequest, Users: func.SqlRowList) -> func.HttpRespon
         status_code=200
     )
 
-def handle_post(req: func.HttpRequest) -> func.HttpResponse:
+def handle_post(req: func.HttpRequest, UsersPost: func.Out[func.SqlRow]) -> func.HttpResponse:
     # Logic for handling POST request
     # Parse the request body
     try:
         req_body = req.get_json()
         # Validate and process the request body
-        # Save the new user to the database or any other data source
-        new_user = {"id": 4, "name": "User 4"}
+        # Save the new user to the database
+        new_user = UsersPost.set(func.SqlRow(req_body))
         return func.HttpResponse(
-            body=json.dumps(new_user),
+            body=json.dumps(req_body),
             mimetype="application/json",
             status_code=201
         )
