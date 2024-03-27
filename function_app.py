@@ -2,8 +2,18 @@ import azure.functions as func
 import datetime
 import json
 import logging
-
+from Pitch import bp_pitches
+from Reservation import bp_reservations
+from User import bp_users
+from Review import bp_reviews
+from PitchOwner import bp_pitche_owners
 app = func.FunctionApp()
+
+app.register_blueprint(bp_pitches)
+app.register_blueprint(bp_reservations)
+app.register_blueprint(bp_users)
+app.register_blueprint(bp_reviews)
+app.register_blueprint(bp_pitche_owners)
 
 @app.route(route="API", auth_level=func.AuthLevel.ANONYMOUS)
 def API(req: func.HttpRequest) -> func.HttpResponse:
@@ -25,3 +35,4 @@ def API(req: func.HttpRequest) -> func.HttpResponse:
              "This HTTP triggered function executed successfully. Pass a name in the query string or in the request body for a personalized response.",
              status_code=200
         )
+
