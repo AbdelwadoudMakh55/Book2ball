@@ -6,15 +6,17 @@ bp_reviews = func.Blueprint()
 @bp_reviews.generic_input_binding(arg_name="Reviews", type="sql", CommandText="SELECT * FROM dbo.Review",
                                   ConnectionStringSetting="SqlConnectionString")
 @bp_reviews.generic_output_binding(arg_name="ReviewsPost", type="sql", CommandText="dbo.Review",
-                                   ConnectionStringSetting="SqlConnectionString")                           
-def review(req: func.HttpRequest, Reviews: func.SqlRowList, ReviewsPost: func.Out[func.SqlRow]) -> func.HttpResponse:
+                                   ConnectionStringSetting="SqlConnectionString")
+@bp_reviews.generic_input_binding(arg_name="Reservations", type="sql", CommandText="SELECT * FROM dbo.Reservation",
+                                  ConnectionStringSetting="SqlConnectionString")                           
+def review(req: func.HttpRequest, Reviews: func.SqlRowList, ReviewsPost: func.Out[func.SqlRow], Reservations: func.SqlRowList) -> func.HttpResponse:
     method = req.method
     if method == 'GET':
         # Handle GET request
         return handle_get(req, Reviews)
     elif method == 'POST':
         # Handle POST request
-        return handle_post(req, ReviewsPost)
+        return handle_post(req, ReviewsPost, Reservations)
     else:
         return func.HttpResponse(
             "Method not allowed",
@@ -31,7 +33,7 @@ def handle_get(req: func.HttpRequest, Reviews: func.SqlRowList) -> func.HttpResp
         status_code=200
     )
 
-def handle_post(req: func.HttpRequest, ReviewsPost: func.Out[func.SqlRow]) -> func.HttpResponse:
+def handle_post(req: func.HttpRequest, ReviewsPost: func.Out[func.SqlRow], Reservations: func.SqlRowList) -> func.HttpResponse:
     # Logic for handling POST request
     # Parse the request body
     try:
@@ -55,6 +57,11 @@ def handle_post(req: func.HttpRequest, ReviewsPost: func.Out[func.SqlRow]) -> fu
         if 'Date' not in req_body:
             return func.HttpResponse(
                 "Missing required field: Date",
+                status_code=400
+            )
+        if not any(reservation['ReservationID'] == req_body['ReservationID'] for reservation in Reservations):
+            return func.HttpResponse(
+                "Invalid ReservationID",
                 status_code=400
             )
         # Save the new review to the database

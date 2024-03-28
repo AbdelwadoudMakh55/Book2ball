@@ -7,14 +7,18 @@ bp_reservations = func.Blueprint()
                                        ConnectionStringSetting="SqlConnectionString")
 @bp_reservations.generic_output_binding(arg_name="ReservationsPost", type="sql", CommandText="dbo.Reservation",
                                         ConnectionStringSetting="SqlConnectionString")
-def reservation(req: func.HttpRequest, Reservations: func.SqlRowList, ReservationsPost: func.Out[func.SqlRow]) -> func.HttpResponse:
+@bp_reservations.generic_input_binding(arg_name="Pitches", type="sql", CommandText="SELECT * FROM dbo.Pitch",
+                                       ConnectionStringSetting="SqlConnectionString")
+@bp_reservations.generic_input_binding(arg_name="Users", type="sql", CommandText="SELECT * FROM dbo.[User]",
+                                       ConnectionStringSetting="SqlConnectionString")
+def reservation(req: func.HttpRequest, Reservations: func.SqlRowList, ReservationsPost: func.Out[func.SqlRow], Pitches: func.SqlRowList, Users: func.SqlRowList) -> func.HttpResponse:
     method = req.method
     if method == 'GET':
         # Handle GET request
         return handle_get(req, Reservations)
     elif method == 'POST':
         # Handle POST request
-        return handle_post(req, ReservationsPost)
+        return handle_post(req, ReservationsPost, Pitches, Users)
     else:
         return func.HttpResponse(
             "Method not allowed",
@@ -31,7 +35,7 @@ def handle_get(req: func.HttpRequest, Reservations: func.SqlRowList) -> func.Htt
         status_code=200
     )
 
-def handle_post(req: func.HttpRequest, ReservationsPost: func.Out[func.SqlRow]) -> func.HttpResponse:
+def handle_post(req: func.HttpRequest, ReservationsPost: func.Out[func.SqlRow], Pitches: func.SqlRowList, Users: func.SqlRowList) -> func.HttpResponse:
     # Logic for handling POST request
     # Parse the request body
     try:
@@ -52,11 +56,6 @@ def handle_post(req: func.HttpRequest, ReservationsPost: func.Out[func.SqlRow]) 
                 "Missing required field: StartTime",
                 status_code=400
             )
-        if 'StartTime' not in req_body:
-            return func.HttpResponse(
-                "Missing required field: EndTime",
-                status_code=400
-            )
         if 'EndTime' not in req_body:
             return func.HttpResponse(
                 "Missing required field: EndTime",
@@ -65,6 +64,16 @@ def handle_post(req: func.HttpRequest, ReservationsPost: func.Out[func.SqlRow]) 
         if 'Status' not in req_body:
             return func.HttpResponse(
                 "Missing required field: Status",
+                status_code=400
+            )
+        if not any(pitch['PitchID'] == req_body['PitchID'] for pitch in Pitches):
+            return func.HttpResponse(
+                "Invalid PitchID",
+                status_code=400
+            )
+        if not any(user['UserID'] == req_body['UserID'] for user in Users):
+            return func.HttpResponse(
+                "Invalid UserID",
                 status_code=400
             )
         # Save the new reservation to the database
