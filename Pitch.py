@@ -1,5 +1,7 @@
 import azure.functions as func
 import json
+import os
+import pyodbc
 
 bp_pitches = func.Blueprint()
 @bp_pitches.route('pitches', methods=['GET', 'POST'])
@@ -98,6 +100,56 @@ def handle_post(req: func.HttpRequest, PitchesPost: func.Out[func.SqlRow], Pitch
             f"Invalid request body",
             status_code=400
         )
+    
+@bp_pitches.route('pitches/{pitch_id}', methods=['GET', 'PUT', 'DELETE'])
+@bp_pitches.generic_input_binding(arg_name="Pitches", type="sql", CommandText="SELECT * FROM dbo.Pitch",
+                                  ConnectionStringSetting="SqlConnectionString")
+def pitch_by_id(req: func.HttpRequest, Pitches: func.SqlRowList) -> func.HttpResponse:
+    method = req.method
+    pitch_id = req.route_params.get('pitch_id')
+    pitches = list(map(lambda r: json.loads(r.to_json()), Pitches))
+    pitch = list(pitch for pitch in pitches if pitch['PitchID'] == pitch_id)
+    if len(pitch) == 0:
+        return func.HttpResponse(
+            "Pitch not found",
+            status_code=404
+        )
+    conn_str = os.getenv("ODBCConnectionString")
+    conn = pyodbc.connect(conn_str)
+    cursor = conn.cursor()
+    if method == 'GET':
+        # Handle GET request
+        return func.HttpResponse(
+            body=json.dumps(pitch),
+            mimetype="application/json",
+            status_code=200
+        )
+    elif method == 'PUT':
+        # Handle PUT request
+        return handle_put(req, pitch_id, Pitches, conn)
+    elif method == 'DELETE':
+        # Handle DELETE request
+        return handle_delete(pitch_id, Pitches, conn)
+    else:
+        return func.HttpResponse(
+            "Method not allowed",
+            status_code=405
+        )
+
+
+def handle_put(req: func.HttpRequest, pitch_id: str, Pitches: func.SqlRowList, connection) -> func.HttpResponse:
+    req_body = req.get_json()
+    cursor = connection.cursor()
+
+
+def handle_delete(pitch_id: str, Pitches: func.SqlRowList, connection) -> func.HttpResponse:
+    cursor = connection.cursor()
+    cursor.execute("DELETE FROM dbo.Pitch WHERE PitchID = ?", pitch_id)
+    connection.commit()
+    return func.HttpResponse(
+        "Pitch deleted successfully",
+        status_code=200
+    )
     
 
     

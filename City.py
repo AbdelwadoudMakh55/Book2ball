@@ -63,9 +63,20 @@ def handle_post(req: func.HttpRequest, CitiesPost: func.Out[func.SqlRow]) -> fun
 def city_by_id(req: func.HttpRequest, Cities: func.SqlRowList) -> func.HttpResponse:
     method = req.method
     city_id = req.route_params.get('city_id')
+    cities = list(map(lambda r: json.loads(r.to_json()), Cities))
+    city = list(city for city in cities if city['CityID'] == city_id)
+    if len(city) == 0:
+        return func.HttpResponse(
+            "City not found",
+            status_code=404
+        )
     if method == 'GET':
         # Handle GET request
-        return handle_get_by_id(city_id, Cities)
+        return func.HttpResponse(
+            body=json.dumps(city),
+            mimetype="application/json",
+            status_code=200
+        )
     elif method == 'DELETE':
         # Handle DELETE request
         return handle_delete(city_id, Cities)
@@ -75,31 +86,9 @@ def city_by_id(req: func.HttpRequest, Cities: func.SqlRowList) -> func.HttpRespo
             status_code=405
         )
 
-def handle_get_by_id(city_id: str, Cities: func.SqlRowList) -> func.HttpResponse:
-    cities = list(map(lambda r: json.loads(r.to_json()), Cities))
-    city = list(city for city in cities if city['CityID'] == city_id)
-    if len(city) == 0:
-        return func.HttpResponse(
-            "City not found",
-            status_code=404
-        )
-    return func.HttpResponse(
-        body=json.dumps(city),
-        mimetype="application/json",
-        status_code=200
-    )
-
-
 def handle_delete(city_id: str, Cities: func.SqlRowList) -> func.HttpResponse:
     # Logic for handling DELETE request
     # Delete the city from the database
-    cities = list(map(lambda r: json.loads(r.to_json()), Cities))
-    city = list(city for city in cities if city['CityID'] == city_id)
-    if len(city) == 0:
-        return func.HttpResponse(
-            "City not found",
-            status_code=404
-        )
     conn_str = os.getenv("ODBCConnectionString")
     conn = pyodbc.connect(conn_str)
     cursor = conn.cursor()
