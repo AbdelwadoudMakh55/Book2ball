@@ -7,14 +7,16 @@ bp_pitch_owners = func.Blueprint()
                                         ConnectionStringSetting="SqlConnectionString")
 @bp_pitch_owners.generic_output_binding(arg_name="PitchOwnersPost", type="sql", CommandText="dbo.PitchOwner",
                                         ConnectionStringSetting="SqlConnectionString")
-def pitch_owner(req: func.HttpRequest, PitchOwners: func.SqlRowList, PitchOwnersPost: func.Out[func.SqlRow]) -> func.HttpResponse:
+@bp_pitch_owners.generic_input_binding(arg_name="Cities", type="sql", CommandText="SELECT * FROM dbo.City",
+                                  ConnectionStringSetting="SqlConnectionString")
+def pitch_owner(req: func.HttpRequest, PitchOwners: func.SqlRowList, PitchOwnersPost: func.Out[func.SqlRow], Cities: func.SqlRowList) -> func.HttpResponse:
     method = req.method
     if method == 'GET':
         # Handle GET request
         return handle_get(req, PitchOwners)
     elif method == 'POST':
         # Handle POST request
-        return handle_post(req, PitchOwnersPost)
+        return handle_post(req, PitchOwnersPost, Cities)
     else:
         return func.HttpResponse(
             "Method not allowed",
@@ -31,7 +33,7 @@ def handle_get(req: func.HttpRequest, PitchOwners: func.SqlRowList) -> func.Http
         status_code=200
     )
 
-def handle_post(req: func.HttpRequest, PitchOwnersPost: func.Out[func.SqlRow]) -> func.HttpResponse:
+def handle_post(req: func.HttpRequest, PitchOwnersPost: func.Out[func.SqlRow], Cities: func.SqlRowList) -> func.HttpResponse:
     # Logic for handling POST request
     # Parse the request body
     try:
@@ -56,6 +58,16 @@ def handle_post(req: func.HttpRequest, PitchOwnersPost: func.Out[func.SqlRow]) -
             return func.HttpResponse(
                 "Missing required field: Address",
                 status_code=400
+            )
+        if 'CityId' not in req_body:
+            return func.HttpResponse(
+                "Missing required field: CityId",
+                status_code=400
+            )
+        if not any(city['Id'] == req_body['CityId'] for city in Cities):
+            return func.HttpResponse(
+                "Invalid CityId",
+                status_code=404
             )
         # Save the new pitch owner to the database
         new_pitch_owner = PitchOwnersPost.set(func.SqlRow(req_body))    
