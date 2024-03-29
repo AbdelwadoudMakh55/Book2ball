@@ -13,7 +13,7 @@ def pitch_owner(req: func.HttpRequest, PitchOwners: func.SqlRowList, PitchOwners
     method = req.method
     if method == 'GET':
         # Handle GET request
-        return handle_get(req, PitchOwners)
+        return handle_get(PitchOwners)
     elif method == 'POST':
         # Handle POST request
         return handle_post(req, PitchOwnersPost, Cities)
@@ -23,7 +23,7 @@ def pitch_owner(req: func.HttpRequest, PitchOwners: func.SqlRowList, PitchOwners
             status_code=405
         )
     
-def handle_get(req: func.HttpRequest, PitchOwners: func.SqlRowList) -> func.HttpResponse:
+def handle_get(PitchOwners: func.SqlRowList) -> func.HttpResponse:
     # Logic for handling GET request
     # Retrieve pitch owners from database or any other data source
     pitch_owners = list(map(lambda r: json.loads(r.to_json()), PitchOwners))

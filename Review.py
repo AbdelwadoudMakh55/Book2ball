@@ -13,7 +13,7 @@ def review(req: func.HttpRequest, Reviews: func.SqlRowList, ReviewsPost: func.Ou
     method = req.method
     if method == 'GET':
         # Handle GET request
-        return handle_get(req, Reviews)
+        return handle_get(Reviews)
     elif method == 'POST':
         # Handle POST request
         return handle_post(req, ReviewsPost, Reservations)
@@ -23,7 +23,7 @@ def review(req: func.HttpRequest, Reviews: func.SqlRowList, ReviewsPost: func.Ou
             status_code=405
         )
     
-def handle_get(req: func.HttpRequest, Reviews: func.SqlRowList) -> func.HttpResponse:
+def handle_get(Reviews: func.SqlRowList) -> func.HttpResponse:
     # Logic for handling GET request
     # Retrieve reviews from database
     reviews = list(map(lambda r: json.loads(r.to_json()), Reviews))

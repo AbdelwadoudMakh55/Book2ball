@@ -15,7 +15,7 @@ def pitch(req: func.HttpRequest, Pitches: func.SqlRowList, PitchesPost: func.Out
     method = req.method
     if method == 'GET':
         # Handle GET request
-        return handle_get(req, Pitches)
+        return handle_get(Pitches)
     elif method == 'POST':
         # Handle POST request
         return handle_post(req, PitchesPost, PitchOwners, Cities)
@@ -25,7 +25,7 @@ def pitch(req: func.HttpRequest, Pitches: func.SqlRowList, PitchesPost: func.Out
             status_code=405
         )
 
-def handle_get(req: func.HttpRequest, Pitches: func.SqlRowList) -> func.HttpResponse:
+def handle_get(Pitches: func.SqlRowList) -> func.HttpResponse:
     # Logic for handling GET request
     # Retrieve pitches from database
     pitches = list(map(lambda r: json.loads(r.to_json()), Pitches))
@@ -95,7 +95,7 @@ def handle_post(req: func.HttpRequest, PitchesPost: func.Out[func.SqlRow], Pitch
         )
     except ValueError as e:
         return func.HttpResponse(
-            f"Invalid request body: {e}",
+            f"Invalid request body",
             status_code=400
         )
     

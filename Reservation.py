@@ -15,7 +15,7 @@ def reservation(req: func.HttpRequest, Reservations: func.SqlRowList, Reservatio
     method = req.method
     if method == 'GET':
         # Handle GET request
-        return handle_get(req, Reservations)
+        return handle_get(Reservations)
     elif method == 'POST':
         # Handle POST request
         return handle_post(req, ReservationsPost, Pitches, Users)
@@ -25,7 +25,7 @@ def reservation(req: func.HttpRequest, Reservations: func.SqlRowList, Reservatio
             status_code=405
         )
     
-def handle_get(req: func.HttpRequest, Reservations: func.SqlRowList) -> func.HttpResponse:
+def handle_get(Reservations: func.SqlRowList) -> func.HttpResponse:
     # Logic for handling GET request
     # Retrieve reservations from database
     reservations = list(map(lambda r: json.loads(r.to_json()), Reservations))

@@ -13,7 +13,7 @@ def user(req: func.HttpRequest, Users: func.SqlRowList, UsersPost: func.Out[func
     method = req.method
     if method == 'GET':
         # Handle GET request
-        return handle_get(req, Users)
+        return handle_get(Users)
     elif method == 'POST':
         # Handle POST request
         return handle_post(req, UsersPost, Cities)
@@ -23,7 +23,7 @@ def user(req: func.HttpRequest, Users: func.SqlRowList, UsersPost: func.Out[func
             status_code=405
         )
     
-def handle_get(req: func.HttpRequest, Users: func.SqlRowList) -> func.HttpResponse:
+def handle_get(Users: func.SqlRowList) -> func.HttpResponse:
     # Logic for handling GET request
     # Retrieve users from database
     users = list(map(lambda r: json.loads(r.to_json()), Users))
