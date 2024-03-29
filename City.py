@@ -43,10 +43,9 @@ def handle_post(req: func.HttpRequest, CitiesPost: func.Out[func.SqlRow]) -> fun
                 status_code=400
             )
         # Insert the city into the database
-        city = req_body
-        CitiesPost.set(json.dumps(city))
+        new_city = CitiesPost.set(func.SqlRow(req_body))
         return func.HttpResponse(
-            body=json.dumps(city),
+            body=json.dumps(req_body),
             mimetype="application/json",
             status_code=201
         )
