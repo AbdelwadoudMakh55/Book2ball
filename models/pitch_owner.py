@@ -1,16 +1,17 @@
 import models
 from models.base_model import BaseModel, Base
-from sqlalchemy import Column, String
+from sqlalchemy import Column, String, ForeignKey
 from sqlalchemy.orm import relationship
 
 
-class Pitch_Owner(BaseModel, Base):
+class PitchOwner(BaseModel, Base):
     """Representation of pitch owner """
     __tablename__ = 'pitch_owners'
     name = Column(String(128), nullable=False)
     email = Column(String(128), nullable=False)
     phone = Column(String(128), nullable=False)
     address = Column(String(128), nullable=False)
+    city_id = Column(String(128), ForeignKey('cities.id'), nullable=False)
     pitches = relationship("Pitch",
                            backref="pitch_owner",
                            cascade="all, delete, delete-orphan")

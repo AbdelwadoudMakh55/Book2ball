@@ -1,53 +1,48 @@
 import azure.functions as func
 import json
-import os
-import pyodbc
+from models import storage
+from models.city import City
+from models.pitch import Pitch
+from models.user import User
 
 bp_cities = func.Blueprint()
 @bp_cities.route('cities', methods=['GET', 'POST'])
-@bp_cities.generic_input_binding(arg_name="Cities", type="sql", CommandText="SELECT * FROM dbo.City",
-                                 ConnectionStringSetting="SqlConnectionString")
-@bp_cities.generic_output_binding(arg_name="CitiesPost", type="sql", CommandText="dbo.City",
-                                  ConnectionStringSetting="SqlConnectionString")
-def city(req: func.HttpRequest, Cities: func.SqlRowList, CitiesPost: func.Out[func.SqlRow]) -> func.HttpResponse:
+def city(req: func.HttpRequest) -> func.HttpResponse:
     method = req.method
     if method == 'GET':
         # Handle GET request
-        return handle_get(Cities)
+        cities = storage.all(City).values()
+        cities = [city.to_dict() for city in cities]
+        return func.HttpResponse(
+            body=json.dumps(cities),
+            mimetype="application/json",
+            status_code=200
+        )
     elif method == 'POST':
         # Handle POST request
-        return handle_post(req, CitiesPost)
+        return handle_post(req)
     else:
         return func.HttpResponse(
             "Method not allowed",
             status_code=405
         )
-    
-def handle_get(Cities: func.SqlRowList) -> func.HttpResponse:
-    # Logic for handling GET request
-    # Retrieve cities from database
-    cities = list(map(lambda r: json.loads(r.to_json()), Cities))
-    return func.HttpResponse(
-        body=json.dumps(cities),
-        mimetype="application/json",
-        status_code=200
-    )
 
-def handle_post(req: func.HttpRequest, CitiesPost: func.Out[func.SqlRow]) -> func.HttpResponse:
+def handle_post(req: func.HttpRequest) -> func.HttpResponse:
     # Logic for handling POST request
     # Parse the request body
     try:
         req_body = req.get_json()
         # Validate and process the request body
-        if 'Name' not in req_body:
+        if 'name' not in req_body:
             return func.HttpResponse(
-                "Missing required field: Name",
+                "Missing required field: name",
                 status_code=400
             )
         # Insert the city into the database
-        new_city = CitiesPost.set(func.SqlRow(req_body))
+        new_city = City(**req_body)
+        new_city.save()
         return func.HttpResponse(
-            body=json.dumps(req_body),
+            body=json.dumps(new_city.to_dict()),
             mimetype="application/json",
             status_code=201
         )
@@ -58,14 +53,11 @@ def handle_post(req: func.HttpRequest, CitiesPost: func.Out[func.SqlRow]) -> fun
         )
     
 @bp_cities.route('cities/{city_id}', methods=['GET', 'DELETE'])
-@bp_cities.generic_input_binding(arg_name="Cities", type="sql", CommandText="SELECT * FROM dbo.City",
-                                 ConnectionStringSetting="SqlConnectionString")
-def city_by_id(req: func.HttpRequest, Cities: func.SqlRowList) -> func.HttpResponse:
+def city_by_id(req: func.HttpRequest) -> func.HttpResponse:
     method = req.method
     city_id = req.route_params.get('city_id')
-    cities = list(map(lambda r: json.loads(r.to_json()), Cities))
-    city = list(city for city in cities if city['CityID'] == city_id)
-    if len(city) == 0:
+    city = storage.get(City, city_id)
+    if not city:
         return func.HttpResponse(
             "City not found",
             status_code=404
@@ -73,28 +65,95 @@ def city_by_id(req: func.HttpRequest, Cities: func.SqlRowList) -> func.HttpRespo
     if method == 'GET':
         # Handle GET request
         return func.HttpResponse(
-            body=json.dumps(city),
+            body=json.dumps(city.to_dict()),
             mimetype="application/json",
             status_code=200
         )
     elif method == 'DELETE':
         # Handle DELETE request
-        return handle_delete(city_id, Cities)
-    else:
+        storage.delete(city)
+        storage.save()
         return func.HttpResponse(
-            "Method not allowed",
-            status_code=405
+            "City deleted successfully",
+            status_code=200
         )
-
-def handle_delete(city_id: str, Cities: func.SqlRowList) -> func.HttpResponse:
-    # Logic for handling DELETE request
-    # Delete the city from the database
-    conn_str = os.getenv("ODBCConnectionString")
-    conn = pyodbc.connect(conn_str)
-    cursor = conn.cursor()
-    cursor.execute("DELETE FROM dbo.City WHERE CityID = ?", city_id)
-    conn.commit()
+    
+@bp_cities.route('cities/{city_id}/pitches', methods=['GET'])
+def pitches_by_city_id(req: func.HttpRequest) -> func.HttpResponse:
+    city_id = req.route_params.get('city_id')
+    city = storage.get(City, city_id)
+    if not city:
+        return func.HttpResponse(
+            "City not found",
+            status_code=404
+        )
+    list_pitches = []
+    for city in city.pitches:
+        list_pitches.append(city.to_dict())
     return func.HttpResponse(
-        "City deleted successfully",
+        body=json.dumps(list_pitches),
+        mimetype="application/json",
+        status_code=200
+    )
+
+@bp_cities.route('cities/{city_id}/pitches/{pitch_id}', methods=['GET'])
+def pitch_by_city_id(req: func.HttpRequest) -> func.HttpResponse:
+    city_id = req.route_params.get('city_id')
+    pitch_id = req.route_params.get('pitch_id')
+    city = storage.get(City, city_id)
+    if not city:
+        return func.HttpResponse(
+            "City not found",
+            status_code=404
+        )
+    pitch = storage.get(Pitch, pitch_id)
+    if not pitch:
+        return func.HttpResponse(
+            "Pitch not found",
+            status_code=404
+        )
+    return func.HttpResponse(
+        body=json.dumps(pitch.to_dict()),
+        mimetype="application/json",
+        status_code=200
+    )
+
+@bp_cities.route('cities/{city_id}/users', methods=['GET'])
+def users_by_city_id(req: func.HttpRequest) -> func.HttpResponse:
+    city_id = req.route_params.get('city_id')
+    city = storage.get(City, city_id)
+    if not city:
+        return func.HttpResponse(
+            "City not found",
+            status_code=404
+        )
+    list_users = []
+    for user in city.users:
+        list_users.append(user.to_dict())
+    return func.HttpResponse(
+        body=json.dumps(list_users),
+        mimetype="application/json",
+        status_code=200
+    )
+
+@bp_cities.route('cities/{city_id}/users/{user_id}', methods=['GET'])
+def user_by_city_id(req: func.HttpRequest) -> func.HttpResponse:
+    city_id = req.route_params.get('city_id')
+    user_id = req.route_params.get('user_id')
+    city = storage.get(City, city_id)
+    if not city:
+        return func.HttpResponse(
+            "City not found",
+            status_code=404
+        )
+    user = storage.get(User, user_id)
+    if not user:
+        return func.HttpResponse(
+            "User not found",
+            status_code=404
+        )
+    return func.HttpResponse(
+        body=json.dumps(user.to_dict()),
+        mimetype="application/json",
         status_code=200
     )

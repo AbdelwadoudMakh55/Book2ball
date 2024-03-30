@@ -1,83 +1,83 @@
 import azure.functions as func
 import json
+from models import storage
+from models.user import User
+from models.reservation import Reservation
 
 bp_users = func.Blueprint()
-@bp_users.route('users', methods=['GET', 'POST'])
-@bp_users.generic_input_binding(arg_name="Users", type="sql", CommandText="SELECT * FROM dbo.[User]",
-                                ConnectionStringSetting="SqlConnectionString")
-@bp_users.generic_output_binding(arg_name="UsersPost", type="sql", CommandText="dbo.[User]",
-                                 ConnectionStringSetting="SqlConnectionString")
-@bp_users.generic_input_binding(arg_name="Cities", type="sql", CommandText="SELECT * FROM dbo.City",
-                                  ConnectionStringSetting="SqlConnectionString")
-def user(req: func.HttpRequest, Users: func.SqlRowList, UsersPost: func.Out[func.SqlRow], Cities: func.SqlRowList) -> func.HttpResponse:
+@bp_users.route('users', methods=['GET'])
+def user(req: func.HttpRequest) -> func.HttpResponse:
     method = req.method
-    if method == 'GET':
-        # Handle GET request
-        return handle_get(Users)
-    elif method == 'POST':
-        # Handle POST request
-        return handle_post(req, UsersPost, Cities)
-    else:
-        return func.HttpResponse(
-            "Method not allowed",
-            status_code=405
-        )
-    
-def handle_get(Users: func.SqlRowList) -> func.HttpResponse:
-    # Logic for handling GET request
-    # Retrieve users from database
-    users = list(map(lambda r: json.loads(r.to_json()), Users))
+    users = storage.all(User).values()
+    users = [user.to_dict() for user in users]
     return func.HttpResponse(
         body=json.dumps(users),
         mimetype="application/json",
         status_code=200
     )
 
-def handle_post(req: func.HttpRequest, UsersPost: func.Out[func.SqlRow], Cities: func.SqlRowList) -> func.HttpResponse:
-    # Logic for handling POST request
-    # Parse the request body
-    try:
-        req_body = req.get_json()
-        # Validate and process the request body
-        if 'Name' not in req_body:
-            return func.HttpResponse(
-                "Missing required field: Name",
-                status_code=400
-            )
-        if 'Email' not in req_body:
-            return func.HttpResponse(
-                "Missing required field: Email",
-                status_code=400
-            )
-        if 'Phone' not in req_body:
-            return func.HttpResponse(
-                "Missing required field: Phone",
-                status_code=400
-            )
-        if 'Address' not in req_body:
-            return func.HttpResponse(
-                "Missing required field: Address",
-                status_code=400
-            )
-        if 'CityId' not in req_body:
-            return func.HttpResponse(
-                "Missing required field: CityId",
-                status_code=400
-            )
-        if not any(city['Id'] == req_body['CityId'] for city in Cities):
-            return func.HttpResponse(
-                "Invalid CityId",
-                status_code=400
-            )
-        # Save the new user to the database
-        new_user = UsersPost.set(func.SqlRow(req_body))
+@bp_users.route('users/{user_id}', methods=['GET'])
+def user(req: func.HttpRequest, user_id: str) -> func.HttpResponse:
+    user = storage.get(User, user_id)
+    if not user:
         return func.HttpResponse(
-            body=json.dumps(req_body),
-            mimetype="application/json",
-            status_code=201
+            "User not found",
+            status_code=404
         )
-    except ValueError:
+    return func.HttpResponse(
+        body=json.dumps(user.to_dict()),
+        mimetype="application/json",
+        status_code=200
+    )
+
+@bp_users.route('users/{user_id}', methods=['DELETE'])
+def user(req: func.HttpRequest, user_id: str) -> func.HttpResponse:
+    user = storage.get(User, user_id)
+    if not user:
         return func.HttpResponse(
-            "Invalid request body",
-            status_code=400
+            "User not found",
+            status_code=404
         )
+    storage.delete(user)
+    storage.save()
+    return func.HttpResponse(
+        body=json.dumps({}),
+        mimetype="application/json",
+        status_code=200
+    )
+
+@bp_users.route('users/{user_id}/reservations', methods=['GET'])
+def user_reservations(req: func.HttpRequest, user_id: str) -> func.HttpResponse:
+    user = storage.get(User, user_id)
+    if not user:
+        return func.HttpResponse(
+            "User not found",
+            status_code=404
+        )
+    reservations = user.reservations
+    reservations = [reservation.to_dict() for reservation in reservations]
+    return func.HttpResponse(
+        body=json.dumps(reservations),
+        mimetype="application/json",
+        status_code=200
+    )
+
+@bp_users.route('users/{user_id}/reservations/{reservation_id}', methods=['GET'])
+def user_reservation(req: func.HttpRequest, user_id: str, reservation_id: str) -> func.HttpResponse:
+    user = storage.get(User, user_id)
+    if not user:
+        return func.HttpResponse(
+            "User not found",
+            status_code=404
+        )
+    reservation = storage.get(Reservation, reservation_id)
+    if not reservation:
+        return func.HttpResponse(
+            "Reservation not found",
+            status_code=404
+        )
+    return func.HttpResponse(
+        body=json.dumps(reservation.to_dict()),
+        mimetype="application/json",
+        status_code=200
+    )

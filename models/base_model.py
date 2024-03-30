@@ -1,7 +1,5 @@
 from datetime import datetime
 import models
-from os import getenv
-import sqlalchemy
 from sqlalchemy import Column, String, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 import uuid
@@ -12,7 +10,7 @@ Base = declarative_base()
 
 class BaseModel:
     """The BaseModel class from which future classes will be derived"""
-    id = Column(String(60), primary_key=True)
+    id = Column(String(128), primary_key=True)
     created_at = Column(DateTime, default=datetime.now())
     updated_at = Column(DateTime, default=datetime.now())
 

@@ -11,9 +11,12 @@ class Pitch(BaseModel, Base):
     type = Column(String(128), nullable=False)
     capacity = Column(Integer, nullable=False)
     availability = Column(Boolean, nullable=False, default=True)
-    pitchOwner_id = Column(String(128), ForeignKey('pitch_owners.PitchOwnerID'), nullable=False)
-    city_id = Column(String(128), ForeignKey('cities.CityID'), nullable=False)
+    pitchOwner_id = Column(String(128), ForeignKey('pitch_owners.id'), nullable=False)
+    city_id = Column(String(128), ForeignKey('cities.id'), nullable=False)
     reviews = relationship("Review",
+                            backref="pitch",
+                            cascade="all, delete, delete-orphan")
+    reservations = relationship("Reservation",
                             backref="pitch",
                             cascade="all, delete, delete-orphan")
 
@@ -32,3 +35,14 @@ class Pitch(BaseModel, Base):
             if review.place_id == self.id:
                 review_list.append(review)
         return review_list
+    
+    @property
+    def reservations(self):
+        """getter attribute returns the list of Reservation instances"""
+        from models.reservation import Reservation
+        reservation_list = []
+        all_reservations = models.storage.all(Reservation)
+        for reservation in all_reservations.values():
+            if reservation.pitch_id == self.id:
+                reservation_list.append(reservation)
+        return reservation_list

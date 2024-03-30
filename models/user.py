@@ -1,6 +1,6 @@
 import models
 from models.base_model import BaseModel, Base
-from sqlalchemy import Column, String
+from sqlalchemy import Column, String, ForeignKey
 from sqlalchemy.orm import relationship
 
 class User(BaseModel, Base):
@@ -10,7 +10,8 @@ class User(BaseModel, Base):
     email = Column(String(128), nullable=False)
     phone = Column(String(128), nullable=False)
     address = Column(String(128), nullable=False)
-    reservations = relationship("Reservation", back_populates="user")
+    city_id = Column(String(128), ForeignKey('cities.id'), nullable=False)
+    reservations = relationship("Reservation", back_populates="user", cascade="all, delete-orphan")
 
     def __init__(self, *args, **kwargs):
         """initializes User"""

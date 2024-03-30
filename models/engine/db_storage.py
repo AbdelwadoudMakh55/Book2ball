@@ -1,29 +1,32 @@
 import models
-from models.base_model import BaseModel, Base
+from models.base_model import Base
 from models.city import City
 from models.pitch import Pitch
-from models.pitch_owner import Pitch_Owner
+from models.pitch_owner import PitchOwner
 from models.reservation import Reservation
 from models.review import Review
 from models.user import User
-import os
+import json
 
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import scoped_session, sessionmaker
 import urllib
 
-classes = {"City": City, "Pitch": Pitch, "PitchOwner": Pitch_Owner, "Reservation": Reservation, "Review": Review, "User": User}
+classes = {"City": City, "Pitch": Pitch, "PitchOwner": PitchOwner, "Reservation": Reservation, "Review": Review, "User": User}
 
 
 class DBStorage:
-    """interaacts with the MySQL database"""
+    """interacts with the MySQL database"""
     __engine = None
     __session = None
 
     def __init__(self):
         """Instantiate a DBStorage object"""
-        conn_str = os.getenv("ODBCConnectionString")
+        with open('local.settings.json') as f:
+            settings = json.load(f)
+        # Get the connection string
+        conn_str = settings.get('Values').get('ODBCConnectionString')
         params = urllib.parse.quote_plus(conn_str)
         self.__engine = create_engine("mssql+pyodbc:///?odbc_connect=%s" % params)
 
