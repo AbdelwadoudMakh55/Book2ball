@@ -16,7 +16,8 @@ def reservation(req: func.HttpRequest) -> func.HttpResponse:
     )
 
 @bp_reservations.route('reservations/{reservation_id}', methods=['GET'])
-def reservation(req: func.HttpRequest, reservation_id: str) -> func.HttpResponse:
+def reservation_by_id(req: func.HttpRequest) -> func.HttpResponse:
+    reservation_id = req.route_params.get('reservation_id')
     reservation = storage.get(Reservation, reservation_id)
     if not reservation:
         return func.HttpResponse(

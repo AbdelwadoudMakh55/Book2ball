@@ -1,8 +1,9 @@
 import azure.functions as func
 import json
-from models import storage
 from models.city import City
 from models.pitch import Pitch
+from models.pitch_owner import PitchOwner
+from models import storage
 from models.user import User
 
 bp_cities = func.Blueprint()
@@ -157,3 +158,44 @@ def user_by_city_id(req: func.HttpRequest) -> func.HttpResponse:
         mimetype="application/json",
         status_code=200
     )
+
+@bp_cities.route('cities/{city_id}/pitch_owners', methods=['GET'])
+def pitch_owners_by_city_id(req: func.HttpRequest) -> func.HttpResponse:
+    city_id = req.route_params.get('city_id')
+    city = storage.get(City, city_id)
+    if not city:
+        return func.HttpResponse(
+            "City not found",
+            status_code=404
+        )
+    list_pitch_owners = []
+    for pitch_owner in city.pitch_owners:
+        list_pitch_owners.append(pitch_owner.to_dict())
+    return func.HttpResponse(
+        body=json.dumps(list_pitch_owners),
+        mimetype="application/json",
+        status_code=200
+    )
+
+@bp_cities.route('cities/{city_id}/pitch_owners/{pitch_owner_id}', methods=['GET'])
+def pitch_owner_by_city_id(req: func.HttpRequest) -> func.HttpResponse:
+    city_id = req.route_params.get('city_id')
+    pitch_owner_id = req.route_params.get('pitch_owner_id')
+    city = storage.get(City, city_id)
+    if not city:
+        return func.HttpResponse(
+            "City not found",
+            status_code=404
+        )
+    pitch_owner = storage.get(PitchOwner, pitch_owner_id)
+    if not pitch_owner:
+        return func.HttpResponse(
+            "PitchOwner not found",
+            status_code=404
+        )
+    return func.HttpResponse(
+        body=json.dumps(pitch_owner.to_dict()),
+        mimetype="application/json",
+        status_code=200
+    )
+

@@ -16,7 +16,8 @@ def reviews(req: func.HttpRequest) -> func.HttpResponse:
     )
 
 @bp_reviews.route('reviews/{review_id}', methods=['GET'])
-def review(req: func.HttpRequest, review_id: str) -> func.HttpResponse:
+def review(req: func.HttpRequest) -> func.HttpResponse:
+    review_id = req.route_params.get('review_id')
     # Logic for handling GET request
     review = storage.get(Review, review_id)
     if not review:

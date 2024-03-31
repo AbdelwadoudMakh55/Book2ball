@@ -16,38 +16,33 @@ def user(req: func.HttpRequest) -> func.HttpResponse:
         status_code=200
     )
 
-@bp_users.route('users/{user_id}', methods=['GET'])
-def user(req: func.HttpRequest, user_id: str) -> func.HttpResponse:
+@bp_users.route('users/{user_id}', methods=['GET', 'DELETE'])
+def user_by_id(req: func.HttpRequest) -> func.HttpResponse:
+    method = req.method
+    user_id = req.route_params.get('user_id')
     user = storage.get(User, user_id)
     if not user:
         return func.HttpResponse(
             "User not found",
             status_code=404
         )
-    return func.HttpResponse(
-        body=json.dumps(user.to_dict()),
-        mimetype="application/json",
-        status_code=200
-    )
-
-@bp_users.route('users/{user_id}', methods=['DELETE'])
-def user(req: func.HttpRequest, user_id: str) -> func.HttpResponse:
-    user = storage.get(User, user_id)
-    if not user:
+    if method == 'GET':
         return func.HttpResponse(
-            "User not found",
-            status_code=404
+            body=json.dumps(user.to_dict()),
+            mimetype="application/json",
+            status_code=200
         )
     storage.delete(user)
     storage.save()
     return func.HttpResponse(
-        body=json.dumps({}),
-        mimetype="application/json",
+        "User deleted successfully",
         status_code=200
     )
 
+
 @bp_users.route('users/{user_id}/reservations', methods=['GET'])
-def user_reservations(req: func.HttpRequest, user_id: str) -> func.HttpResponse:
+def user_reservations(req: func.HttpRequest) -> func.HttpResponse:
+    user_id = req.route_params.get('user_id')
     user = storage.get(User, user_id)
     if not user:
         return func.HttpResponse(
@@ -63,7 +58,9 @@ def user_reservations(req: func.HttpRequest, user_id: str) -> func.HttpResponse:
     )
 
 @bp_users.route('users/{user_id}/reservations/{reservation_id}', methods=['GET'])
-def user_reservation(req: func.HttpRequest, user_id: str, reservation_id: str) -> func.HttpResponse:
+def user_reservation(req: func.HttpRequest) -> func.HttpResponse:
+    user_id = req.route_params.get('user_id')
+    reservation_id = req.route_params.get('reservation_id')
     user = storage.get(User, user_id)
     if not user:
         return func.HttpResponse(
