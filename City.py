@@ -5,9 +5,12 @@ from models.pitch import Pitch
 from models.pitch_owner import PitchOwner
 from models import storage
 from models.user import User
+from firebase_config import firebase_auth
 
 bp_cities = func.Blueprint()
+
 @bp_cities.route('cities', methods=['GET', 'POST'])
+@firebase_auth
 def city(req: func.HttpRequest) -> func.HttpResponse:
     method = req.method
     if method == 'GET':
@@ -54,6 +57,7 @@ def handle_post(req: func.HttpRequest) -> func.HttpResponse:
         )
     
 @bp_cities.route('cities/{city_id}', methods=['GET', 'DELETE'])
+@firebase_auth
 def city_by_id(req: func.HttpRequest) -> func.HttpResponse:
     method = req.method
     city_id = req.route_params.get('city_id')
@@ -80,6 +84,7 @@ def city_by_id(req: func.HttpRequest) -> func.HttpResponse:
         )
     
 @bp_cities.route('cities/{city_id}/pitches', methods=['GET'])
+@firebase_auth
 def pitches_by_city_id(req: func.HttpRequest) -> func.HttpResponse:
     city_id = req.route_params.get('city_id')
     city = storage.get(City, city_id)
@@ -98,6 +103,7 @@ def pitches_by_city_id(req: func.HttpRequest) -> func.HttpResponse:
     )
 
 @bp_cities.route('cities/{city_id}/pitches/{pitch_id}', methods=['GET'])
+@firebase_auth
 def pitch_by_city_id(req: func.HttpRequest) -> func.HttpResponse:
     city_id = req.route_params.get('city_id')
     pitch_id = req.route_params.get('pitch_id')
@@ -120,6 +126,7 @@ def pitch_by_city_id(req: func.HttpRequest) -> func.HttpResponse:
     )
 
 @bp_cities.route('cities/{city_id}/users', methods=['GET'])
+@firebase_auth
 def users_by_city_id(req: func.HttpRequest) -> func.HttpResponse:
     city_id = req.route_params.get('city_id')
     city = storage.get(City, city_id)

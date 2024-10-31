@@ -4,10 +4,10 @@ from models import storage
 from models.user import User
 from models.reservation import Reservation
 
+
 bp_users = func.Blueprint()
 @bp_users.route('users', methods=['GET'])
 def user(req: func.HttpRequest) -> func.HttpResponse:
-    method = req.method
     users = storage.all(User).values()
     users = [user.to_dict() for user in users]
     return func.HttpResponse(

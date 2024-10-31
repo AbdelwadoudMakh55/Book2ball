@@ -7,7 +7,6 @@ from models.reservation import Reservation
 bp_pitches = func.Blueprint()
 @bp_pitches.route('pitches', methods=['GET'])
 def pitch(req: func.HttpRequest) -> func.HttpResponse:
-    method = req.method
     # Handle GET request
     pitches = storage.all(Pitch).values()
     pitches = [pitch.to_dict() for pitch in pitches]
@@ -19,7 +18,6 @@ def pitch(req: func.HttpRequest) -> func.HttpResponse:
     
 @bp_pitches.route('pitches/{pitch_id}', methods=['GET'])
 def pitch_by_id(req: func.HttpRequest) -> func.HttpResponse:
-    method = req.method
     pitch_id = req.route_params.get('pitch_id')
     pitch = storage.get(Pitch, pitch_id)
     if not pitch:

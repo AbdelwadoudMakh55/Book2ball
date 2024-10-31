@@ -28,7 +28,7 @@ class DBStorage:
         # Get the connection string
         conn_str = settings.get('Values').get('ODBCConnectionString')
         params = urllib.parse.quote_plus(conn_str)
-        self.__engine = create_engine("mssql+pyodbc:///?odbc_connect=%s" % params)
+        self.__engine = create_engine(f"mssql+pyodbc:///?odbc_connect={params}")
 
 
     def all(self, cls=None):
