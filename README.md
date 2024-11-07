@@ -3,7 +3,7 @@
 
 ### Architecture
 
-![Book2ball_Architecture](https://github.com/AbdelwadoudMakh55/Book2ball/assets/133237331/ac21c5eb-d51b-4967-a0ab-4628931a59e3)
+![Book2ball_Architecture](Book2ball_Architecture_React.png))
 
 
 ### Contributors
