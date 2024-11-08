@@ -3,7 +3,7 @@
 
 ### Architecture
 
-![Book2ball_Architecture](Book2ball_Architecture_React.png))
+![Book2ball_Architecture](Book2ball_Architecture_React.png)
 
 
 ### Contributors
