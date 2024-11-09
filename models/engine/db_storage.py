@@ -81,6 +81,20 @@ class DBStorage:
 
         return None
 
+    def get_by_name(self, cls, name):
+        """
+        Returns the object based on the class name and its name, or
+        None if not found
+        """
+        if cls not in classes.values():
+            return None
+
+        all_cls = models.storage.all(cls)
+        for value in all_cls.values():
+            if (value.name == name):
+                return value
+
+        return None
     def count(self, cls=None):
         """
         count the number of objects in storage

@@ -9,7 +9,6 @@ class User(BaseModel, Base):
     name = Column(String(128), nullable=False)
     email = Column(String(128), nullable=False)
     phone = Column(String(128), nullable=False)
-    address = Column(String(128), nullable=False)
     city_id = Column(String(128), ForeignKey('cities.id'), nullable=False)
     reservations = relationship("Reservation", back_populates="user", cascade="all, delete-orphan")
 

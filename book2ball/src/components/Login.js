@@ -38,6 +38,7 @@ function Login() {
           required
         />
         <button type="submit">LOGIN</button>
+        <p>Don't have an account? <a href="/signup">Sign up</a></p>
       </form>
     </div>
   );

@@ -1,19 +1,37 @@
-import React, { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { auth } from '../config/firebase';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { createUserWithEmailAndPassword, sendEmailVerification } from 'firebase/auth';
+import axios from 'axios';
 import './signup.css';
 
 function SignUp() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
+  const [city, setCity] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
+  const [cities, setCities] = useState([]);
+
+  useEffect(() => {
+    fetch('/cities.json')
+      .then((response) => response.json())
+      .then((data) => setCities(data))
+      .catch((error) => console.error('Error fetching cities:', error));
+  }, []);
 
   const handleSignUp = async (e) => {
     e.preventDefault();
     try {
-      await createUserWithEmailAndPassword(auth, email, password);
-      // API CALL TO ADD USER TO DATABASE
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+      await sendEmailVerification(user);
+      alert('Verification email sent. Please check your inbox.');
+      await axios.post('http://localhost:7071/api/users', {
+        email: user.email,
+        name: fullName,
+        city: city,
+        phone: phoneNumber,
+      });
     } catch (error) {
       console.error('Error signing up:', error);
     }
@@ -21,7 +39,7 @@ function SignUp() {
 
   return (
     <div className="signup">
-      <h2>Create an Account</h2>
+      <h2>Sign Up</h2>
       <form onSubmit={handleSignUp}>
         <label htmlFor="fullName">Full Name</label>
         <input
@@ -47,6 +65,20 @@ function SignUp() {
           onChange={(e) => setPhoneNumber(e.target.value)}
           required
         />
+        <label htmlFor="city">City</label>
+        <select
+          id="city"
+          value={city}
+          onChange={(e) => setCity(e.target.value)}
+          required
+        >
+          <option value="">Select a city</option>
+          {cities.map((city, index) => (
+            <option key={index} value={city}>
+              {city}
+            </option>
+          ))}
+        </select>
         <label htmlFor="password">Password</label>
         <input
           type="password"

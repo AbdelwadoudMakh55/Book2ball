@@ -28,11 +28,14 @@
   color: #2c3e50;
 }
 
-.signup input {
+.signup input,
+.signup select {
   margin-bottom: 1rem;
   padding: 0.75rem;
   border: 1px solid #ccc;
   border-radius: 5px;
+  font-size: 1rem;
+  font-family: 'Poppins', sans-serif;
 }
 
 .signup button {
@@ -45,7 +48,7 @@
   transition: background-color 0.3s ease;
   font-size: 0.875rem;
   width: 100%;
-  margin: 0 auto;
+  margin: 0 auto; 
 }
 
 .signup button:hover {

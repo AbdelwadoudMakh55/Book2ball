@@ -7,7 +7,7 @@ from sqlalchemy.orm import relationship
 class City(BaseModel, Base):
     """Representation of city """
     __tablename__ = 'cities'
-    name = Column(String(128), nullable=False)
+    name = Column(String(128), nullable=False, unique=True)
     pitches = relationship('Pitch', backref='city', cascade='all, delete-orphan')
     users = relationship('User', backref='city', cascade='all, delete-orphan')
     pitch_owners = relationship('PitchOwner', backref='city', cascade='all, delete-orphan')

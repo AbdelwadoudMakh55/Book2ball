@@ -1,6 +1,7 @@
 import azure.functions as func
 import json
 from models import storage
+from models.city import City
 from models.user import User
 from models.reservation import Reservation
 
@@ -39,6 +40,45 @@ def user_by_id(req: func.HttpRequest) -> func.HttpResponse:
         status_code=200
     )
 
+@bp_users.route('users', methods=['POST'])
+def create_user(req: func.HttpRequest) -> func.HttpResponse:
+    body = req.get_json()
+    if not body:
+        return func.HttpResponse(
+            "Invalid body",
+            status_code=400
+        )
+    if 'name' not in body:
+        return func.HttpResponse(
+            "Name is required",
+            status_code=400
+        )
+    if 'email' not in body:
+        return func.HttpResponse(
+            "Email is required",
+            status_code=400
+        )
+    if 'phone' not in body:
+        return func.HttpResponse(
+            "Phone is required",
+            status_code=400
+        )
+    if 'city' not in body:
+        return func.HttpResponse(
+            "City is required",
+            status_code=400
+        )
+    city = storage.get_by_name(City, body['city'])
+    del body['city']
+    body['city_id'] = city.id
+    user = User(**body)
+    storage.new(user)
+    storage.save()
+    return func.HttpResponse(
+        body=json.dumps(user.to_dict()),
+        mimetype="application/json",
+        status_code=201
+    )
 
 @bp_users.route('users/{user_id}/reservations', methods=['GET'])
 def user_reservations(req: func.HttpRequest) -> func.HttpResponse:
