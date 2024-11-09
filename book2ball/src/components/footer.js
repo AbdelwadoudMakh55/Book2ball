@@ -1,10 +1,11 @@
-import './footer.css';
+import './Footer.css';
 
 function Footer() {
   return (
     <footer className="footer">
       <ul className="footer-links">
         <li><a href="#home">Home</a></li>
+        <li><a href="#features">Features</a></li>
         <li><a href="#fields">Fields</a></li>
         <li><a href="#reservations">Reservations</a></li>
         <li><a href="#pricing">Pricing</a></li>

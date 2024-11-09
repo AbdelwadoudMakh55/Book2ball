@@ -24,6 +24,10 @@ body {
     height: 40px;
     margin-right: 0.5rem;
 }
+
+.navbar-logo .navbar-title {
+    text-decoration: none;
+}
   
 .navbar-logo h1 {
     margin: 0;
