@@ -26,11 +26,11 @@ function SignUp() {
       const user = userCredential.user;
       await sendEmailVerification(user);
       alert('Verification email sent. Please check your inbox.');
-      await axios.post('http://localhost:7071/api/users', {
-        email: user.email,
+      axios.post('http://localhost:7071/api/users', {
         name: fullName,
-        city: city,
+        email,
         phone: phoneNumber,
+        city,
       });
     } catch (error) {
       console.error('Error signing up:', error);
@@ -87,7 +87,7 @@ function SignUp() {
           onChange={(e) => setPassword(e.target.value)}
           required
         />
-        <button type="submit">Sign Up</button>
+        <button type="submit">SIGN UP</button>
       </form>
     </div>
   );

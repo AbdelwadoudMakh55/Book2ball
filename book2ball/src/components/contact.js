@@ -6,8 +6,8 @@ function Contact() {
       <h2>Contact Us</h2>
       <div className="contact-info">
         <p>Address: Route El Jadida Km 8, BP : 7731, Quartier Laymoune, Casablanca</p>
-        <p>Phone: (123) 456-7890</p>
-        <p>Email: info@book2ball.com</p>
+        <p>Phone: (+212) 656075038</p>
+        <p>Email: abdelwadoudmakhlok@gmail.com</p>
       </div>
       <form className="contact-form">
         <label htmlFor="name">Name</label>

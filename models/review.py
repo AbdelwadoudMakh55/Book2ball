@@ -1,21 +1,23 @@
+"""
+Module for Review Objetcs
+"""
+
+
+from .base_model import BaseModel
+from sqlmodel import Field, Relationship
+from typing import TYPE_CHECKING
 from datetime import datetime
-import models
-from models.base_model import BaseModel, Base
-from os import getenv
-import sqlalchemy
-from sqlalchemy import Column, String, Integer, DateTime, ForeignKey
 
 
-class Review(BaseModel, Base):
-    """Representation of Review """
-
-    __tablename__ = 'reviews'
-    reservation_id = Column(String(128), ForeignKey('reservations.id'), nullable=False)
-    comment = Column(String(1024), nullable=False)
-    rating = Column(Integer, nullable=False)
-    date = Column(DateTime, default=datetime.now(), nullable=False)
+if TYPE_CHECKING:
+    from .pitch import Pitch
 
 
-    def __init__(self, *args, **kwargs):
-        """initializes Review"""
-        super().__init__(*args, **kwargs)
+class Review(BaseModel, table=True):
+    """Class of review"""
+
+    pitch_id: str = Field(default=None, foreign_key='pitch.id', nullable=False, max_length=128)
+    comment: str = Field(default=None, nullable=False)
+    rating: int = Field(default=None, nullable=False)
+    date: datetime = Field(default_factory=datetime.now, nullable=False)
+    pitch: 'Pitch' = Relationship(back_populates='reviews')

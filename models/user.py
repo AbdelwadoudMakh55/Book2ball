@@ -1,28 +1,27 @@
-import models
-from models.base_model import BaseModel, Base
-from sqlalchemy import Column, String, ForeignKey
-from sqlalchemy.orm import relationship
+"""
+Module of User Objects
+"""
 
-class User(BaseModel, Base):
-    """Representation of user """
-    __tablename__ = 'users'
-    name = Column(String(128), nullable=False)
-    email = Column(String(128), nullable=False)
-    phone = Column(String(128), nullable=False)
-    city_id = Column(String(128), ForeignKey('cities.id'), nullable=False)
-    reservations = relationship("Reservation", back_populates="user", cascade="all, delete-orphan")
 
-    def __init__(self, *args, **kwargs):
-        """initializes User"""
-        super().__init__(*args, **kwargs)
+from .base_model import BaseModel
+from sqlmodel import Field, Relationship
+from typing import TYPE_CHECKING
+from pydantic import EmailStr
+from pydantic_extra_types.phone_numbers import PhoneNumber
 
-    @property
-    def reservations(self):
-        """getter attribute returns the list of Reservation instances"""
-        from models.reservation import Reservation
-        reservation_list = []
-        all_reservations = models.storage.all(Reservation)
-        for reservation in all_reservations.values():
-            if reservation.user_id == self.id:
-                reservation_list.append(reservation)
-        return reservation_list
+
+if TYPE_CHECKING:
+    from .reservation import Reservation
+    from .city import City
+    
+
+class User(BaseModel, table=True):
+    """Class of user"""
+    
+    name: str = Field(default=None, nullable=False)
+    email: EmailStr = Field(default=None, nullable=False)
+    phone: PhoneNumber = Field(default=None, nullable=False)
+    is_verified: bool = Field(default=False, nullable=False)
+    city_id: str = Field(default=None, nullable=False, foreign_key='city.id', max_length=128)
+    city: 'City' = Relationship(back_populates='users')
+    reservations: list['Reservation'] = Relationship(back_populates='user')

@@ -4,4 +4,9 @@
 
 azure-functions
 pyodbc
-sqlalchemy
+sqlmodel
+pydantic-extra-types
+phonenumbers
+python-dotenv
+alembic
+requests

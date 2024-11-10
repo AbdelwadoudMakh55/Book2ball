@@ -1,13 +1,12 @@
 import azure.functions as func
 import json
-from models import storage
-from models.review import Review
+from crud.review import *
 
 bp_reviews = func.Blueprint()
 @bp_reviews.route('reviews', methods=['GET'])                     
 def reviews(req: func.HttpRequest) -> func.HttpResponse:
     # Logic for handling GET request
-    reviews = storage.all(Review).values()
+    reviews = get_all_reviews()
     reviews = [review.to_dict() for review in reviews]
     return func.HttpResponse(
         body=json.dumps(reviews),
@@ -19,7 +18,7 @@ def reviews(req: func.HttpRequest) -> func.HttpResponse:
 def review(req: func.HttpRequest) -> func.HttpResponse:
     review_id = req.route_params.get('review_id')
     # Logic for handling GET request
-    review = storage.get(Review, review_id)
+    review = get_review_by_id(review_id)
     if not review:
         return func.HttpResponse(
             "Review not found",

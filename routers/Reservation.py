@@ -1,13 +1,11 @@
 import azure.functions as func
 import json
-from models import storage
-from models.reservation import Reservation
+from crud.reservation import *
 
 bp_reservations = func.Blueprint()
 @bp_reservations.route('reservations', methods=['GET'])
 def reservation(req: func.HttpRequest) -> func.HttpResponse:
-    method = req.method
-    reservations = storage.all(Reservation).values()
+    reservations = get_all_reservations()
     reservations = [reservation.to_dict() for reservation in reservations]
     return func.HttpResponse(
         body=json.dumps(reservations),
@@ -18,7 +16,7 @@ def reservation(req: func.HttpRequest) -> func.HttpResponse:
 @bp_reservations.route('reservations/{reservation_id}', methods=['GET'])
 def reservation_by_id(req: func.HttpRequest) -> func.HttpResponse:
     reservation_id = req.route_params.get('reservation_id')
-    reservation = storage.get(Reservation, reservation_id)
+    reservation = get_reservation_by_id(reservation_id)
     if not reservation:
         return func.HttpResponse(
             "Reservation not found",

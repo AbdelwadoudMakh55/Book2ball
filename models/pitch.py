@@ -1,48 +1,33 @@
-import models
-from models.base_model import BaseModel, Base
-from sqlalchemy import Column, String, Integer, Boolean, ForeignKey
-from sqlalchemy.orm import relationship
+"""
+Module of Pitch Objects
+"""
 
-class Pitch(BaseModel, Base):
-    """Representation of pitch """
-    __tablename__ = 'pitches'
-    name = Column(String(128), nullable=False)
-    location = Column(String(200), nullable=False)
-    type = Column(String(128), nullable=False)
-    capacity = Column(Integer, nullable=False)
-    availability = Column(Boolean, nullable=False, default=True)
-    pitchOwner_id = Column(String(128), ForeignKey('pitch_owners.id'), nullable=False)
-    city_id = Column(String(128), ForeignKey('cities.id'), nullable=False)
-    reviews = relationship("Review",
-                            backref="pitch",
-                            cascade="all, delete, delete-orphan")
-    reservations = relationship("Reservation",
-                            backref="pitch",
-                            cascade="all, delete, delete-orphan")
 
+from .base_model import BaseModel
+from sqlmodel import Field, Relationship
+from typing import TYPE_CHECKING
+from enum import Enum
+
+if TYPE_CHECKING:
+    from .review import Review
+    from .reservation import Reservation
+    from .pitch_owner import PitchOwner
     
-    def __init__(self, *args, **kwargs):
-        """initializes Place"""
-        super().__init__(*args, **kwargs)
+class Capacity(int, Enum):
+    """ Capacity Enum """
+    SMALL = 10
+    MEDIUM = 16
+    LARGE = 22
 
-    @property
-    def reviews(self):
-        """getter attribute returns the list of Review instances"""
-        from models.review import Review
-        review_list = []
-        all_reviews = models.storage.all(Review)
-        for review in all_reviews.values():
-            if review.place_id == self.id:
-                review_list.append(review)
-        return review_list
+class Pitch(BaseModel, table=True):
+    """Class of Pitch Objects"""
     
-    @property
-    def reservations(self):
-        """getter attribute returns the list of Reservation instances"""
-        from models.reservation import Reservation
-        reservation_list = []
-        all_reservations = models.storage.all(Reservation)
-        for reservation in all_reservations.values():
-            if reservation.pitch_id == self.id:
-                reservation_list.append(reservation)
-        return reservation_list
+    name: str = Field(default=None, nullable=False)
+    location: str = Field(default=None, nullable=False)
+    capacity: Capacity = Field(default=None, nullable=False)
+    availability: bool = Field(default=True, nullable=False)
+    pitchOwner_id: str = Field(default=None, foreign_key='pitchowner.id', nullable=False, max_length=128)
+    city_id: str = Field(default=None, foreign_key='city.id', nullable=False, max_length=128)
+    pitchOwner: 'PitchOwner' = Relationship(back_populates='pitches')
+    reviews: list["Review"] = Relationship(back_populates='pitch')
+    reservations: list["Reservation"] = Relationship(back_populates='pitch')

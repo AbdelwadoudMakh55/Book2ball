@@ -1,10 +1,9 @@
 import azure.functions as func
 import json
-from models.city import City
-from models.pitch import Pitch
-from models.pitch_owner import PitchOwner
-from models import storage
-from models.user import User
+from crud.city import *
+from crud.pitch import *
+from crud.user import *
+from crud.pitch_owner import *
 from firebase_config import firebase_auth
 
 bp_cities = func.Blueprint()
@@ -15,8 +14,7 @@ def city(req: func.HttpRequest) -> func.HttpResponse:
     method = req.method
     if method == 'GET':
         # Handle GET request
-        cities = storage.all(City).values()
-        cities = [city.to_dict() for city in cities]
+        cities = get_all_cities()
         return func.HttpResponse(
             body=json.dumps(cities),
             mimetype="application/json",
@@ -43,8 +41,7 @@ def handle_post(req: func.HttpRequest) -> func.HttpResponse:
                 status_code=400
             )
         # Insert the city into the database
-        new_city = City(**req_body)
-        new_city.save()
+        new_city = create_city(req_body)
         return func.HttpResponse(
             body=json.dumps(new_city.to_dict()),
             mimetype="application/json",
@@ -61,7 +58,7 @@ def handle_post(req: func.HttpRequest) -> func.HttpResponse:
 def city_by_id(req: func.HttpRequest) -> func.HttpResponse:
     method = req.method
     city_id = req.route_params.get('city_id')
-    city = storage.get(City, city_id)
+    city = get_city_by_id(city_id)
     if not city:
         return func.HttpResponse(
             "City not found",
@@ -76,8 +73,7 @@ def city_by_id(req: func.HttpRequest) -> func.HttpResponse:
         )
     elif method == 'DELETE':
         # Handle DELETE request
-        storage.delete(city)
-        storage.save()
+        delete_city(city_id)
         return func.HttpResponse(
             "City deleted successfully",
             status_code=200
@@ -87,17 +83,15 @@ def city_by_id(req: func.HttpRequest) -> func.HttpResponse:
 @firebase_auth
 def pitches_by_city_id(req: func.HttpRequest) -> func.HttpResponse:
     city_id = req.route_params.get('city_id')
-    city = storage.get(City, city_id)
+    city = get_city_by_id(city_id)
     if not city:
         return func.HttpResponse(
             "City not found",
             status_code=404
         )
-    list_pitches = []
-    for city in city.pitches:
-        list_pitches.append(city.to_dict())
+    pitches = city.pitches
     return func.HttpResponse(
-        body=json.dumps(list_pitches),
+        body=json.dumps(pitches),
         mimetype="application/json",
         status_code=200
     )
@@ -107,13 +101,13 @@ def pitches_by_city_id(req: func.HttpRequest) -> func.HttpResponse:
 def pitch_by_city_id(req: func.HttpRequest) -> func.HttpResponse:
     city_id = req.route_params.get('city_id')
     pitch_id = req.route_params.get('pitch_id')
-    city = storage.get(City, city_id)
+    city = get_city_by_id(city_id)
     if not city:
         return func.HttpResponse(
             "City not found",
             status_code=404
         )
-    pitch = storage.get(Pitch, pitch_id)
+    pitch = get_pitch_by_id(pitch_id)
     if not pitch:
         return func.HttpResponse(
             "Pitch not found",
@@ -129,17 +123,15 @@ def pitch_by_city_id(req: func.HttpRequest) -> func.HttpResponse:
 @firebase_auth
 def users_by_city_id(req: func.HttpRequest) -> func.HttpResponse:
     city_id = req.route_params.get('city_id')
-    city = storage.get(City, city_id)
+    city = get_city_by_id(city_id)
     if not city:
         return func.HttpResponse(
             "City not found",
             status_code=404
         )
-    list_users = []
-    for user in city.users:
-        list_users.append(user.to_dict())
+    users = city.users
     return func.HttpResponse(
-        body=json.dumps(list_users),
+        body=json.dumps(users),
         mimetype="application/json",
         status_code=200
     )
@@ -148,14 +140,14 @@ def users_by_city_id(req: func.HttpRequest) -> func.HttpResponse:
 def user_by_city_id(req: func.HttpRequest) -> func.HttpResponse:
     city_id = req.route_params.get('city_id')
     user_id = req.route_params.get('user_id')
-    city = storage.get(City, city_id)
+    city = get_city_by_id(city_id)
     if not city:
         return func.HttpResponse(
             "City not found",
             status_code=404
         )
-    user = storage.get(User, user_id)
-    if not user:
+    user = get_user_by_id(user_id)
+    if not user.city_id == city_id:
         return func.HttpResponse(
             "User not found",
             status_code=404
@@ -169,17 +161,15 @@ def user_by_city_id(req: func.HttpRequest) -> func.HttpResponse:
 @bp_cities.route('cities/{city_id}/pitch_owners', methods=['GET'])
 def pitch_owners_by_city_id(req: func.HttpRequest) -> func.HttpResponse:
     city_id = req.route_params.get('city_id')
-    city = storage.get(City, city_id)
+    city = get_city_by_id(city_id)
     if not city:
         return func.HttpResponse(
             "City not found",
             status_code=404
         )
-    list_pitch_owners = []
-    for pitch_owner in city.pitch_owners:
-        list_pitch_owners.append(pitch_owner.to_dict())
+    pitch_owners = city.pitch_owners
     return func.HttpResponse(
-        body=json.dumps(list_pitch_owners),
+        body=json.dumps(pitch_owners),
         mimetype="application/json",
         status_code=200
     )
@@ -188,14 +178,14 @@ def pitch_owners_by_city_id(req: func.HttpRequest) -> func.HttpResponse:
 def pitch_owner_by_city_id(req: func.HttpRequest) -> func.HttpResponse:
     city_id = req.route_params.get('city_id')
     pitch_owner_id = req.route_params.get('pitch_owner_id')
-    city = storage.get(City, city_id)
+    city = get_city_by_id(city_id)
     if not city:
         return func.HttpResponse(
             "City not found",
             status_code=404
         )
-    pitch_owner = storage.get(PitchOwner, pitch_owner_id)
-    if not pitch_owner:
+    pitch_owner = get_pitch_owner_by_id(pitch_owner_id)
+    if not pitch_owner.city_id == city_id:
         return func.HttpResponse(
             "PitchOwner not found",
             status_code=404
@@ -205,4 +195,3 @@ def pitch_owner_by_city_id(req: func.HttpRequest) -> func.HttpResponse:
         mimetype="application/json",
         status_code=200
     )
-

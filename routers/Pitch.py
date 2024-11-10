@@ -1,15 +1,16 @@
 import azure.functions as func
 import json
-from models import storage
-from models.pitch import Pitch
-from models.reservation import Reservation
+from crud.pitch import *
+from crud.reservation import *
+
 
 bp_pitches = func.Blueprint()
+
+
 @bp_pitches.route('pitches', methods=['GET'])
 def pitch(req: func.HttpRequest) -> func.HttpResponse:
     # Handle GET request
-    pitches = storage.all(Pitch).values()
-    pitches = [pitch.to_dict() for pitch in pitches]
+    pitches = get_all_pitches()
     return func.HttpResponse(
         body=json.dumps(pitches),
         mimetype="application/json",
@@ -19,7 +20,7 @@ def pitch(req: func.HttpRequest) -> func.HttpResponse:
 @bp_pitches.route('pitches/{pitch_id}', methods=['GET'])
 def pitch_by_id(req: func.HttpRequest) -> func.HttpResponse:
     pitch_id = req.route_params.get('pitch_id')
-    pitch = storage.get(Pitch, pitch_id)
+    pitch = get_pitch_by_id(pitch_id)
     if not pitch:
         return func.HttpResponse(
             "Pitch not found",
@@ -35,17 +36,15 @@ def pitch_by_id(req: func.HttpRequest) -> func.HttpResponse:
 @bp_pitches.route('pitches/{pitch_id}/reservations', methods=['GET'])
 def reservations_by_pitch_id(req: func.HttpRequest) -> func.HttpResponse:
     pitch_id = req.route_params.get('pitch_id')
-    pitch = storage.get(Pitch, pitch_id)
+    pitch = get_pitch_by_id(pitch_id)
     if not pitch:
         return func.HttpResponse(
             "Pitch not found",
             status_code=404
         )
-    list_reservations = []
-    for reservation in pitch.reservations:
-        list_reservations.append(reservation.to_dict())
+    reservations = pitch.reservations
     return func.HttpResponse(
-        body=json.dumps(list_reservations),
+        body=json.dumps(reservations),
         mimetype="application/json",
         status_code=200
     )
@@ -53,7 +52,7 @@ def reservations_by_pitch_id(req: func.HttpRequest) -> func.HttpResponse:
 @bp_pitches.route('pitches/{pitch_id}/reservations', methods=['POST'])
 def create_reservation(req: func.HttpRequest) -> func.HttpResponse:
     pitch_id = req.route_params.get('pitch_id')
-    pitch = storage.get(Pitch, pitch_id)
+    pitch = get_pitch_by_id(pitch_id)
     if not pitch:
         return func.HttpResponse(
             "Pitch not found",
@@ -66,19 +65,9 @@ def create_reservation(req: func.HttpRequest) -> func.HttpResponse:
                 "Missing required field: user_id",
                 status_code=400
             )
-        if 'date' not in req_body:
-            return func.HttpResponse(
-                "Missing required field: date",
-                status_code=400
-            )
         if 'start_time' not in req_body:
             return func.HttpResponse(
                 "Missing required field: start_time",
-                status_code=400
-            )
-        if 'end_time' not in req_body:
-            return func.HttpResponse(
-                "Missing required field: end_time",
                 status_code=400
             )
         if 'status' not in req_body:
@@ -87,8 +76,7 @@ def create_reservation(req: func.HttpRequest) -> func.HttpResponse:
                 status_code=400
             )
         req_body['pitch_id'] = pitch_id
-        new_reservation = Reservation(**req_body)
-        new_reservation.save()
+        new_reservation = create_reservation(req_body)
         return func.HttpResponse(
             body=json.dumps(new_reservation.to_dict()),
             mimetype="application/json",
@@ -104,14 +92,14 @@ def create_reservation(req: func.HttpRequest) -> func.HttpResponse:
 def reservation_by_pitch_id(req: func.HttpRequest) -> func.HttpResponse:
     pitch_id = req.route_params.get('pitch_id')
     reservation_id = req.route_params.get('reservation_id')
-    pitch = storage.get(Pitch, pitch_id)
+    pitch = get_pitch_by_id(pitch_id)
     if not pitch:
         return func.HttpResponse(
             "Pitch not found",
             status_code=404
         )
-    reservation = storage.get(Reservation, reservation_id)
-    if not reservation:
+    reservation = get_reservation_by_id(reservation_id)
+    if not reservation.pitch_id == pitch_id:
         return func.HttpResponse(
             "Reservation not found",
             status_code=404
@@ -121,4 +109,3 @@ def reservation_by_pitch_id(req: func.HttpRequest) -> func.HttpResponse:
         mimetype="application/json",
         status_code=200
     )
-    
