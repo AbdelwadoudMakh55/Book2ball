@@ -12,6 +12,7 @@ if TYPE_CHECKING:
     from .review import Review
     from .reservation import Reservation
     from .pitch_owner import PitchOwner
+    from .city import City
     
 class Capacity(int, Enum):
     """ Capacity Enum """
@@ -28,6 +29,7 @@ class Pitch(BaseModel, table=True):
     availability: bool = Field(default=True, nullable=False)
     pitchOwner_id: str = Field(default=None, foreign_key='pitchowner.id', nullable=False, max_length=128)
     city_id: str = Field(default=None, foreign_key='city.id', nullable=False, max_length=128)
+    city: 'City' = Relationship(back_populates='pitches')
     pitchOwner: 'PitchOwner' = Relationship(back_populates='pitches')
     reviews: list["Review"] = Relationship(back_populates='pitch')
     reservations: list["Reservation"] = Relationship(back_populates='pitch')

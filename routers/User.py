@@ -68,10 +68,9 @@ def create_user(req: func.HttpRequest) -> func.HttpResponse:
     city = get_city_by_name(body['city'])
     del body['city']
     body['city_id'] = city.id
-    user = User(**body)
-    user = create_user(user)
+    new_user = create_user_db(**body)
     return func.HttpResponse(
-        body=json.dumps(user.to_dict()),
+        body=json.dumps(new_user.to_dict()),
         mimetype="application/json",
         status_code=201
     )

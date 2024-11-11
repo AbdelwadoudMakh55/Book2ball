@@ -12,6 +12,7 @@ from pydantic_extra_types.phone_numbers import PhoneNumber
 
 if TYPE_CHECKING:
     from .pitch import Pitch
+    from .city import City
     
     
 class PitchOwner(BaseModel, table=True):
@@ -21,4 +22,5 @@ class PitchOwner(BaseModel, table=True):
     email: EmailStr = Field(default=None, nullable=False)
     phone: PhoneNumber = Field(default=None, nullable=False)
     city_id: str = Field(default=None, nullable=False, foreign_key='city.id', max_length=128)
+    city: 'City' = Relationship(back_populates='pitch_owners')
     pitches: list['Pitch'] = Relationship(back_populates='pitchOwner')

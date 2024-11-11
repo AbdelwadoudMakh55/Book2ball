@@ -34,15 +34,16 @@ def get_user_by_email(email: str):
         user = session.exec(statement).first()
     return user
 
-def create_user(user: User):
+def create_user_db(**kwargs) -> User:
     """
     Create a new user in the database
     """
+    new_user = User(**kwargs)
     with Session(engine) as session:
-        session.add(user)
+        session.add(new_user)
         session.commit()
-        session.refresh(user)
-    return user
+        session.refresh(new_user)
+        return new_user
 
 def update_user(user_id: str, **kwargs):
     """
@@ -55,7 +56,7 @@ def update_user(user_id: str, **kwargs):
         session.add(user)
         session.commit()
         session.refresh(user)
-    return user
+        return user
 
 def delete_user(user_id: str):
     """
