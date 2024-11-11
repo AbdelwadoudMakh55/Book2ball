@@ -52,3 +52,8 @@
 .login button:hover {
   background-color: #1e8449;
 }
+
+.error {
+  color: rgb(210, 8, 8);
+  margin-bottom: 1rem;
+}

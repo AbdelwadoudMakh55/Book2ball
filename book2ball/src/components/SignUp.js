@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { auth } from '../config/firebase';
 import { createUserWithEmailAndPassword, sendEmailVerification } from 'firebase/auth';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import './signup.css';
 
@@ -11,6 +12,7 @@ function SignUp() {
   const [city, setCity] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [cities, setCities] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetch('/cities.json')
@@ -32,6 +34,7 @@ function SignUp() {
         phone: phoneNumber,
         city,
       });
+      navigate('/login');
     } catch (error) {
       console.error('Error signing up:', error);
     }
@@ -88,6 +91,7 @@ function SignUp() {
           required
         />
         <button type="submit">SIGN UP</button>
+        <p>Already have an account? <a href='/login'>Log in</a></p>
       </form>
     </div>
   );
