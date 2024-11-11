@@ -9,11 +9,9 @@ from firebase_config import firebase_auth
 bp_cities = func.Blueprint()
 
 @bp_cities.route('cities', methods=['GET', 'POST'])
-@firebase_auth
 def city(req: func.HttpRequest) -> func.HttpResponse:
     method = req.method
     if method == 'GET':
-        # Handle GET request
         cities = get_all_cities()
         return func.HttpResponse(
             body=json.dumps(cities),
@@ -21,17 +19,9 @@ def city(req: func.HttpRequest) -> func.HttpResponse:
             status_code=200
         )
     elif method == 'POST':
-        # Handle POST request
         return handle_post(req)
-    else:
-        return func.HttpResponse(
-            "Method not allowed",
-            status_code=405
-        )
 
 def handle_post(req: func.HttpRequest) -> func.HttpResponse:
-    # Logic for handling POST request
-    # Parse the request body
     try:
         req_body = req.get_json()
         # Validate and process the request body
@@ -41,7 +31,7 @@ def handle_post(req: func.HttpRequest) -> func.HttpResponse:
                 status_code=400
             )
         # Insert the city into the database
-        new_city = create_city(req_body)
+        new_city = create_city(**req_body)
         return func.HttpResponse(
             body=json.dumps(new_city.to_dict()),
             mimetype="application/json",
@@ -53,8 +43,7 @@ def handle_post(req: func.HttpRequest) -> func.HttpResponse:
             status_code=400
         )
     
-@bp_cities.route('cities/{city_id}', methods=['GET', 'DELETE'])
-@firebase_auth
+@bp_cities.route('cities/{city_id}', methods=['GET', 'DELETE', 'PUT'])
 def city_by_id(req: func.HttpRequest) -> func.HttpResponse:
     method = req.method
     city_id = req.route_params.get('city_id')
@@ -65,22 +54,43 @@ def city_by_id(req: func.HttpRequest) -> func.HttpResponse:
             status_code=404
         )
     if method == 'GET':
-        # Handle GET request
         return func.HttpResponse(
             body=json.dumps(city.to_dict()),
             mimetype="application/json",
             status_code=200
         )
     elif method == 'DELETE':
-        # Handle DELETE request
         delete_city(city_id)
         return func.HttpResponse(
             "City deleted successfully",
             status_code=200
         )
+    elif method == 'PUT':
+        return handle_put(city_id, req)
+
+def handle_put(city_id, req: func.HttpRequest) -> func.HttpResponse:
+    try:
+        req_body = req.get_json()
+        # Validate and process the request body
+        if 'name'  not in req_body:
+            return func.HttpResponse(
+                "Missing required field: name",
+                status_code=400
+            )
+        # Update the city in the database
+        updated_city = update_city(city_id, **req_body)
+        return func.HttpResponse(
+            body=json.dumps(updated_city.to_dict()),
+            mimetype="application/json",
+            status_code=200
+        )
+    except ValueError:
+        return func.HttpResponse(
+            "Invalid request body",
+            status_code=400
+        )
     
 @bp_cities.route('cities/{city_id}/pitches', methods=['GET'])
-@firebase_auth
 def pitches_by_city_id(req: func.HttpRequest) -> func.HttpResponse:
     city_id = req.route_params.get('city_id')
     city = get_city_by_id(city_id)
@@ -89,15 +99,15 @@ def pitches_by_city_id(req: func.HttpRequest) -> func.HttpResponse:
             "City not found",
             status_code=404
         )
-    pitches = city.pitches
+    pitches = get_pitches_by_city_id(city_id)
     return func.HttpResponse(
         body=json.dumps(pitches),
         mimetype="application/json",
         status_code=200
     )
 
+# TODO: Test this route after adding pitches to the Database
 @bp_cities.route('cities/{city_id}/pitches/{pitch_id}', methods=['GET'])
-@firebase_auth
 def pitch_by_city_id(req: func.HttpRequest) -> func.HttpResponse:
     city_id = req.route_params.get('city_id')
     pitch_id = req.route_params.get('pitch_id')
@@ -120,7 +130,6 @@ def pitch_by_city_id(req: func.HttpRequest) -> func.HttpResponse:
     )
 
 @bp_cities.route('cities/{city_id}/users', methods=['GET'])
-@firebase_auth
 def users_by_city_id(req: func.HttpRequest) -> func.HttpResponse:
     city_id = req.route_params.get('city_id')
     city = get_city_by_id(city_id)
@@ -129,13 +138,14 @@ def users_by_city_id(req: func.HttpRequest) -> func.HttpResponse:
             "City not found",
             status_code=404
         )
-    users = city.users
+    users = get_users_by_city_id(city_id)
     return func.HttpResponse(
         body=json.dumps(users),
         mimetype="application/json",
         status_code=200
     )
 
+# TODO: Test this route after adding users to the Database
 @bp_cities.route('cities/{city_id}/users/{user_id}', methods=['GET'])
 def user_by_city_id(req: func.HttpRequest) -> func.HttpResponse:
     city_id = req.route_params.get('city_id')
@@ -158,7 +168,7 @@ def user_by_city_id(req: func.HttpRequest) -> func.HttpResponse:
         status_code=200
     )
 
-@bp_cities.route('cities/{city_id}/pitch_owners', methods=['GET'])
+@bp_cities.route('cities/{city_id}/pitch-owners', methods=['GET'])
 def pitch_owners_by_city_id(req: func.HttpRequest) -> func.HttpResponse:
     city_id = req.route_params.get('city_id')
     city = get_city_by_id(city_id)
@@ -167,14 +177,15 @@ def pitch_owners_by_city_id(req: func.HttpRequest) -> func.HttpResponse:
             "City not found",
             status_code=404
         )
-    pitch_owners = city.pitch_owners
+    pitch_owners = get_pitch_owners_by_city_id(city_id)
     return func.HttpResponse(
         body=json.dumps(pitch_owners),
         mimetype="application/json",
         status_code=200
     )
 
-@bp_cities.route('cities/{city_id}/pitch_owners/{pitch_owner_id}', methods=['GET'])
+# TODO: Test this route after adding pitch owners to the Database
+@bp_cities.route('cities/{city_id}/pitch-owners/{pitch_owner_id}', methods=['GET'])
 def pitch_owner_by_city_id(req: func.HttpRequest) -> func.HttpResponse:
     city_id = req.route_params.get('city_id')
     pitch_owner_id = req.route_params.get('pitch_owner_id')

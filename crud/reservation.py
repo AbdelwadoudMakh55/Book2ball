@@ -32,6 +32,7 @@ def get_reservations_by_user_id(user_id: str):
     with Session(engine) as session:
         statement = select(Reservation).where(Reservation.user_id == user_id)
         reservations = session.exec(statement).all()
+        reservations = [reservation.to_dict() for reservation in reservations]
     return reservations
 
 def get_reservations_by_pitch_id(pitch_id: str):
@@ -41,12 +42,14 @@ def get_reservations_by_pitch_id(pitch_id: str):
     with Session(engine) as session:
         statement = select(Reservation).where(Reservation.pitch_id == pitch_id)
         reservations = session.exec(statement).all()
+        reservations = [reservation.to_dict() for reservation in reservations]
     return reservations
 
-def create_reservation(reservation: Reservation):
+def create_reservation_db(**kwargs):
     """
     Create a new reservation in the database
     """
+    reservation = Reservation(**kwargs)
     with Session(engine) as session:
         session.add(reservation)
         session.commit()
@@ -73,4 +76,3 @@ def delete_reservation(reservation_id: str):
         if reservation:
             session.delete(reservation)
             session.commit()
-    return reservation

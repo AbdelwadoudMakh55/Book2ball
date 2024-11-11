@@ -13,9 +13,7 @@ function Login() {
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
-      console.log('User logged in:', user);
+      await signInWithEmailAndPassword(auth, email, password);
       // Redirect to the dashboard
       navigate('/dashboard');
     } catch (error) {
@@ -35,6 +33,7 @@ function Login() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
+          autoComplete='email'
         />
         <label htmlFor="password">Password</label>
         <input
@@ -43,6 +42,7 @@ function Login() {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           required
+          autoComplete='current-password'
         />
         {error && <p className="error">{error}</p>}
         <button type="submit">LOGIN</button>

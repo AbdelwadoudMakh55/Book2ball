@@ -1,4 +1,4 @@
-import './Features.css';
+import './features.css';
 
 function Features() {
   const features = [

@@ -14,6 +14,7 @@ def get_all_reviews():
     with Session(engine) as session:
         statement = select(Review)
         reviews = session.exec(statement).all()
+        reviews = [review.to_dict() for review in reviews]
     return reviews
 
 def get_review_by_id(review_id: str):
@@ -33,12 +34,14 @@ def get_reviews_by_pitch_id(pitch_id: str):
     with Session(engine) as session:
         statement = select(Review).where(Review.pitch_id == pitch_id)
         reviews = session.exec(statement).all()
+        reviews = [review.to_dict() for review in reviews]
     return reviews
 
-def create_review(review: Review):
+def create_review(**kwargs):
     """
     Create a new review in the database
     """
+    review = Review(**kwargs)
     with Session(engine) as session:
         session.add(review)
         session.commit()
@@ -65,4 +68,3 @@ def delete_review(review_id: str):
         if review:
             session.delete(review)
             session.commit()
-    return review

@@ -14,6 +14,7 @@ def get_all_users():
     with Session(engine) as session:
         statement = select(User)
         users = session.exec(statement).all()
+        users = [user.to_dict() for user in users]
     return users
 
 def get_user_by_id(user_id: str):
@@ -67,4 +68,3 @@ def delete_user(user_id: str):
         if user:
             session.delete(user)
             session.commit()
-    return user

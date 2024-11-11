@@ -5,15 +5,52 @@ from crud.city import *
 from crud.reservation import *
 
 bp_users = func.Blueprint()
-@bp_users.route('users', methods=['GET'])
+@bp_users.route('users', methods=['GET', 'POST'])
 def user(req: func.HttpRequest) -> func.HttpResponse:
-    users = get_all_users()
-    users = [user.to_dict() for user in users]
-    return func.HttpResponse(
-        body=json.dumps(users),
-        mimetype="application/json",
-        status_code=200
-    )
+    method = req.method
+    if method == 'GET':
+        users = get_all_users()
+        return func.HttpResponse(
+            body=json.dumps(users),
+            mimetype="application/json",
+            status_code=200
+        )
+    elif method == 'POST':
+        body = req.get_json()
+        if not body:
+            return func.HttpResponse(
+                "Invalid body",
+                status_code=400
+            )
+        if 'name' not in body:
+            return func.HttpResponse(
+                "Name is required",
+                status_code=400
+            )
+        if 'email' not in body:
+            return func.HttpResponse(
+                "Email is required",
+                status_code=400
+            )
+        if 'phone' not in body:
+            return func.HttpResponse(
+                "Phone is required",
+                status_code=400
+            )
+        if 'city' not in body:
+            return func.HttpResponse(
+                "City is required",
+                status_code=400
+            )
+        city = get_city_by_name(body['city'])
+        del body['city']
+        body['city_id'] = city.id
+        new_user = create_user_db(**body)
+        return func.HttpResponse(
+            body=json.dumps(new_user.to_dict()),
+            mimetype="application/json",
+            status_code=201
+        )
 
 @bp_users.route('users/{user_id}', methods=['GET', 'DELETE'])
 def user_by_id(req: func.HttpRequest) -> func.HttpResponse:
@@ -37,44 +74,6 @@ def user_by_id(req: func.HttpRequest) -> func.HttpResponse:
         status_code=200
     )
 
-@bp_users.route('users', methods=['POST'])
-def create_user(req: func.HttpRequest) -> func.HttpResponse:
-    body = req.get_json()
-    if not body:
-        return func.HttpResponse(
-            "Invalid body",
-            status_code=400
-        )
-    if 'name' not in body:
-        return func.HttpResponse(
-            "Name is required",
-            status_code=400
-        )
-    if 'email' not in body:
-        return func.HttpResponse(
-            "Email is required",
-            status_code=400
-        )
-    if 'phone' not in body:
-        return func.HttpResponse(
-            "Phone is required",
-            status_code=400
-        )
-    if 'city' not in body:
-        return func.HttpResponse(
-            "City is required",
-            status_code=400
-        )
-    city = get_city_by_name(body['city'])
-    del body['city']
-    body['city_id'] = city.id
-    new_user = create_user_db(**body)
-    return func.HttpResponse(
-        body=json.dumps(new_user.to_dict()),
-        mimetype="application/json",
-        status_code=201
-    )
-
 @bp_users.route('users/{user_id}/reservations', methods=['GET'])
 def user_reservations(req: func.HttpRequest) -> func.HttpResponse:
     user_id = req.route_params.get('user_id')
@@ -84,8 +83,7 @@ def user_reservations(req: func.HttpRequest) -> func.HttpResponse:
             "User not found",
             status_code=404
         )
-    reservations = user.reservations
-    reservations = [reservation.to_dict() for reservation in reservations]
+    reservations = get_reservations_by_user_id(user_id)
     return func.HttpResponse(
         body=json.dumps(reservations),
         mimetype="application/json",

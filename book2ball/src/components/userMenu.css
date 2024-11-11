@@ -1,0 +1,66 @@
+.user-menu {
+  position: relative;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.user-name {
+  font-weight: bold;
+  color: white;
+}
+
+.user-icon {
+  font-size: 1.5rem;
+  color: white;
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 130%; /* Adjust this value to drop the menu a little bit */
+  right: 0;
+  background-color: white;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  width: 200px;
+}
+
+.dropdown-header {
+  display: flex;
+  align-items: center;
+  justify-content: center; /* Center the content horizontally */
+  padding: 0.5rem 1rem;
+  border-bottom: 1px solid #ddd;
+  flex-direction: column; /* Stack the icon and email vertically */
+}
+
+.dropdown-icon {
+  font-size: 1.5rem;
+  color: #333;
+  margin-bottom: 0.5rem; /* Add space between the icon and email */
+}
+
+.dropdown-email {
+  font-weight: bold;
+  color: #333;
+  font-size: small;
+  text-align: center;
+  width: 100%; /* Ensure the email takes the full width */
+}
+
+.dropdown-item {
+  padding: 0.5rem 1rem;
+  color: #333;
+  text-align: left;
+  background-color: white;
+  border: none;
+  width: 100%;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.dropdown-item:hover {
+  background-color: #f0f0f0;
+}

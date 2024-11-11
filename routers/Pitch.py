@@ -42,13 +42,14 @@ def reservations_by_pitch_id(req: func.HttpRequest) -> func.HttpResponse:
             "Pitch not found",
             status_code=404
         )
-    reservations = pitch.reservations
+    reservations = get_reservations_by_pitch_id(pitch_id)
     return func.HttpResponse(
         body=json.dumps(reservations),
         mimetype="application/json",
         status_code=200
     )
 
+# TODO: Test this endpoint after adding pitches in the database
 @bp_pitches.route('pitches/{pitch_id}/reservations', methods=['POST'])
 def create_reservation(req: func.HttpRequest) -> func.HttpResponse:
     pitch_id = req.route_params.get('pitch_id')
@@ -76,7 +77,7 @@ def create_reservation(req: func.HttpRequest) -> func.HttpResponse:
                 status_code=400
             )
         req_body['pitch_id'] = pitch_id
-        new_reservation = create_reservation(req_body)
+        new_reservation = create_reservation_db(**req_body)
         return func.HttpResponse(
             body=json.dumps(new_reservation.to_dict()),
             mimetype="application/json",

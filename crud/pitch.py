@@ -14,6 +14,7 @@ def get_all_pitches():
     with Session(engine) as session:
         statement = select(Pitch)
         pitches = session.exec(statement).all()
+        pitches = [pitch.to_dict() for pitch in pitches]
     return pitches
 
 def get_pitch_by_id(pitch_id: str):
@@ -34,7 +35,7 @@ def get_pitch_by_name(pitch_name: str):
         pitch = session.exec(statement).first()
     return pitch
 
-def create_pitch(pitch: Pitch):
+def create_pitch_db(pitch: Pitch):
     """
     Create a new pitch in the database
     """
@@ -64,4 +65,3 @@ def delete_pitch(pitch_id: str):
         if pitch:
             session.delete(pitch)
             session.commit()
-    return pitch

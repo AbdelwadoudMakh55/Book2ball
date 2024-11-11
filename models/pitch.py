@@ -27,6 +27,7 @@ class Pitch(BaseModel, table=True):
     location: str = Field(default=None, nullable=False)
     capacity: Capacity = Field(default=None, nullable=False)
     availability: bool = Field(default=True, nullable=False)
+    images_url: str = Field(default=None, nullable=False)
     pitchOwner_id: str = Field(default=None, foreign_key='pitchowner.id', nullable=False, max_length=128)
     city_id: str = Field(default=None, foreign_key='city.id', nullable=False, max_length=128)
     city: 'City' = Relationship(back_populates='pitches')
