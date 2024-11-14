@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { FaUserCircle } from 'react-icons/fa';
@@ -8,6 +8,7 @@ function UserMenu() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const menuRef = useRef(null);
 
   const handleLogout = async () => {
     await logout();
@@ -18,8 +19,21 @@ function UserMenu() {
     setDropdownOpen(!dropdownOpen);
   };
 
+  const handleClickOutside = (event) => {
+    if (menuRef.current && !menuRef.current.contains(event.target)) {
+      setDropdownOpen(false);
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
   return (
-    <div className="user-menu">
+    <div className="user-menu" ref={menuRef}>
       <FaUserCircle className="user-icon" onClick={toggleDropdown} />
       {dropdownOpen && (
         <div className="dropdown-menu">
