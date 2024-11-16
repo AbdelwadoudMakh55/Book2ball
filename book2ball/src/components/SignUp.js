@@ -29,6 +29,7 @@ function SignUp() {
       await sendEmailVerification(user);
       alert('Verification email sent. Please check your inbox.');
       axios.post('http://localhost:7071/api/users', {
+        id: user.uid,
         name: fullName,
         email,
         phone: phoneNumber,
