@@ -4,7 +4,7 @@ from crud.city import *
 from crud.pitch import *
 from crud.user import *
 from crud.pitch_owner import *
-from firebase_config import firebase_auth
+from auth.firebase_config import firebase_auth
 
 bp_cities = func.Blueprint()
 

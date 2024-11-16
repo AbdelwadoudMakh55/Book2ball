@@ -7,7 +7,7 @@ from routers.Review import bp_reviews
 from routers.PitchOwner import bp_pitch_owners
 from routers.City import bp_cities
 from auth.email_verification import bp_auth
-from firebase_config import firebase_config
+from auth.firebase_config import firebase_config
 from models.database import create_database_tables, engine
 
 

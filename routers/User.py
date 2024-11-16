@@ -22,6 +22,11 @@ def user(req: func.HttpRequest) -> func.HttpResponse:
                 "Invalid body",
                 status_code=400
             )
+        if 'id' not in body:
+            return func.HttpResponse(
+                "ID is required",
+                status_code=400
+            )
         if 'name' not in body:
             return func.HttpResponse(
                 "Name is required",
