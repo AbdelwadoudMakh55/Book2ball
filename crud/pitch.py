@@ -35,22 +35,25 @@ def get_pitch_by_name(pitch_name: str):
         pitch = session.exec(statement).first()
     return pitch
 
-def create_pitch_db(pitch: Pitch):
+def create_pitch_db(**kwargs):
     """
     Create a new pitch in the database
     """
+    pitch = Pitch(**kwargs)
     with Session(engine) as session:
         session.add(pitch)
         session.commit()
         session.refresh(pitch)
     return pitch
 
-def update_pitch(**kwargs):
+def update_pitch(pitch_id: str, **kwargs):
     """
     Update an existing pitch in the database
     """
-    pitch = Pitch(**kwargs)
+    pitch = get_pitch_by_id(pitch_id)
     with Session(engine) as session:
+        for key, value in kwargs.items():
+            setattr(pitch, key, value)
         session.add(pitch)
         session.commit()
         session.refresh(pitch)

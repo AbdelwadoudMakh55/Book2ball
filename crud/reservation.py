@@ -5,6 +5,7 @@ Module of Reservation CRUD operations
 from models.reservation import Reservation
 from models.database import engine
 from sqlmodel import Session, select
+from datetime import datetime
 
 
 def get_all_reservations():
@@ -14,6 +15,7 @@ def get_all_reservations():
     with Session(engine) as session:
         statement = select(Reservation)
         reservations = session.exec(statement).all()
+        reservations = [reservation.to_dict() for reservation in reservations]
     return reservations
 
 def get_reservation_by_id(reservation_id: str):
@@ -42,8 +44,18 @@ def get_reservations_by_pitch_id(pitch_id: str):
     with Session(engine) as session:
         statement = select(Reservation).where(Reservation.pitch_id == pitch_id)
         reservations = session.exec(statement).all()
-        reservations = [reservation.to_dict() for reservation in reservations]
     return reservations
+
+def get_reservation_by_start_time(pitch_id: str, start_time: str):
+    """
+    Get a reservation by its start time
+    """
+    start_time = datetime.strptime(start_time, "%Y-%m-%d %H:%M:%S")
+    with Session(engine) as session:
+        statement = select(Reservation).where(Reservation.pitch_id == pitch_id).where(Reservation.start_time == start_time)
+        reservation = session.exec(statement).first()
+    return reservation
+
 
 def create_reservation_db(**kwargs):
     """

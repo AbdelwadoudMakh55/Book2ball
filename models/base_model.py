@@ -30,6 +30,8 @@ class BaseModel(SQLModel):
             new_dict["created_at"] = new_dict["created_at"].strftime(time)
         if "updated_at" in new_dict:
             new_dict["updated_at"] = new_dict["updated_at"].strftime(time)
+        if "start_time" in new_dict:
+            new_dict["start_time"] = new_dict["start_time"].strftime(time)
         new_dict["__class__"] = self.__class__.__name__
         if "_sa_instance_state" in new_dict:
             del new_dict["_sa_instance_state"]
