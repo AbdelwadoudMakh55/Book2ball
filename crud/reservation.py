@@ -68,12 +68,14 @@ def create_reservation_db(**kwargs):
         session.refresh(reservation)
     return reservation
 
-def update_reservation(**kwargs):
+def update_reservation(reservation_id, **kwargs):
     """
     Update an existing reservation in the database
     """
-    reservation = Reservation(**kwargs)
+    reservation = get_reservation_by_id(reservation_id)
     with Session(engine) as session:
+        for key, value in kwargs.items():
+            setattr(reservation, key, value)
         session.add(reservation)
         session.commit()
         session.refresh(reservation)

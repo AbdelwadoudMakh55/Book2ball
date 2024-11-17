@@ -18,7 +18,7 @@ if TYPE_CHECKING:
 class Status(str, Enum):
     """Enum of status values"""
     PENDING = 'pending'
-    ACCEPTED = 'accepted'
+    CONFIRMED = 'confirmed'
     CANCELED = 'canceled'
     
     

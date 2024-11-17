@@ -2,7 +2,9 @@ import azure.functions as func
 import json
 from crud.reservation import *
 from crud.pitch import *
-from datetime import datetime
+from crud.user import *
+from external_services.reservation_verification_email import send_email_for_reservation_verification
+from datetime import datetime, timedelta
 
 bp_reservations = func.Blueprint()
 @bp_reservations.route('reservations', methods=['GET'])
@@ -14,7 +16,6 @@ def reservation(req: func.HttpRequest) -> func.HttpResponse:
         status_code=200
     )
 
-# TODO: Test this endpoint after adding pitches in the database
 @bp_reservations.route('reservations/{pitch_id}', methods=['POST'])
 def create_reservation(req: func.HttpRequest) -> func.HttpResponse:
     pitch_id = req.route_params.get('pitch_id')
@@ -36,6 +37,8 @@ def create_reservation(req: func.HttpRequest) -> func.HttpResponse:
                 "Missing required field: start_time",
                 status_code=400
             )
+        start_time_str = req_body['start_time']
+        user = get_user_by_id(req_body['user_id'])
         try:
             start_time = datetime.strptime(req_body['start_time'], '%Y-%m-%d %H:%M:%S')
         except ValueError:
@@ -49,9 +52,9 @@ def create_reservation(req: func.HttpRequest) -> func.HttpResponse:
                 "Reservation already exists for this start_time",
                 status_code=400
             )
-        if start_time < datetime.now():
+        if start_time < datetime.now() + timedelta(hours=1):
             return func.HttpResponse(
-                "Invalid start_time. It must be in the future",
+                "Invalid start_time. It must be in the future at earliest 1 hour from now",
                 status_code=400
             )
         pitch_reservations = get_reservations_by_pitch_id(pitch_id)
@@ -66,7 +69,14 @@ def create_reservation(req: func.HttpRequest) -> func.HttpResponse:
             )
         req_body['pitch_id'] = pitch_id
         req_body['start_time'] = start_time
-        new_reservation = create_reservation_db(**req_body)
+        try:
+            new_reservation = create_reservation_db(**req_body)
+            send_email_for_reservation_verification(user, pitch.name, start_time_str, new_reservation.id)
+        except Exception as e:
+            return func.HttpResponse(
+                f"Failed to create reservation: {e}",
+                status_code=500
+            )
         return func.HttpResponse(
             body=json.dumps(new_reservation.to_dict()),
             mimetype="application/json",
@@ -92,4 +102,3 @@ def reservation_by_id(req: func.HttpRequest) -> func.HttpResponse:
         mimetype="application/json",
         status_code=200
     )
-    

@@ -1,6 +1,9 @@
 import azure.functions as func
 import requests
 from crud.user import *
+from crud.reservation import *
+from models.reservation import Status
+from datetime import datetime
 import json
 
 
@@ -48,3 +51,26 @@ def email_verification(req: func.HttpRequest) -> func.HttpResponse:
             mimetype="application/json",
             status_code=400
         )
+        
+        
+@bp_auth.route('verify-reservation', methods=['GET'])
+def verify_reservation(req: func.HttpRequest) -> func.HttpResponse:
+    user_id = req.params.get('user_id')
+    reservation_id = req.params.get('reservation_id')
+    
+    if not user_id or not reservation_id:
+        return func.HttpResponse(
+            "Missing required query parameters: user_id and reservation_id",
+            status_code=400
+        )
+    reservation = get_reservation_by_id(reservation_id)
+    if not reservation or reservation.user_id != user_id:
+        return func.HttpResponse(
+            "Reservation not found",
+            status_code=404
+        )
+    update_reservation(reservation.id, status=Status.CONFIRMED)
+    return func.HttpResponse(
+        "Reservation verified successfully",
+        status_code=200
+    )

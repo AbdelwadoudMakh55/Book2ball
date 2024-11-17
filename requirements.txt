@@ -10,3 +10,4 @@ phonenumbers
 python-dotenv
 alembic
 requests
+azure-communication-email
