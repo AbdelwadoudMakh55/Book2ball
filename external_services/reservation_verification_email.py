@@ -1,10 +1,13 @@
 from azure.communication.email import EmailClient
 from models.user import User
+import json
 
 def send_email_for_reservation_verification(user: User, pitch_name: str, start_time: str, reservation_id: str):
     try:
-        api_key = "57bDIfe4llgKGvfhLMHNGPhRRWf5yd4ggrjyZU9tdXekY4aXV17cJQQJ99AKACULyCpUbquRAAAAAZCSwiyN"
-        endpoint = "https://book2ball-mail2025.france.communication.azure.com/"
+        with open("local.setting.json", "r") as file:
+            data = json.load()
+        api_key = data["Values"]["API_KEY"] 
+        endpoint = data["Values"]["ENDPOINT"]
         connection_string = f"endpoint={endpoint};accesskey={api_key}"
         verification_link = f"http://localhost:7071/api/verify-reservation?user_id={user.id}&reservation_id={reservation_id}"
         client = EmailClient.from_connection_string(connection_string)
