@@ -11,3 +11,4 @@ python-dotenv
 alembic
 requests
 azure-communication-email
+firebase-admin

@@ -1,1 +1,5 @@
 .venv
+book2ball/
+__pycache__/
+.vscode/
+Book2ball_Architecture.png
