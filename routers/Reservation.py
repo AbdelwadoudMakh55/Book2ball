@@ -3,7 +3,7 @@ import json
 from crud.reservation import *
 from crud.pitch import *
 from crud.user import *
-from external_services.reservation_verification_email import send_email_for_reservation_verification
+from services.reservation_verification_email import send_email_for_reservation_verification
 from datetime import datetime, timedelta
 
 bp_reservations = func.Blueprint()

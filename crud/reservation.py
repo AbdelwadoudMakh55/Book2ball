@@ -56,6 +56,14 @@ def get_reservation_by_start_time(pitch_id: str, start_time: str):
         reservation = session.exec(statement).first()
     return reservation
 
+def get_reservations_by_status(status: str):
+    """
+    Get reservations by status
+    """
+    with Session(engine) as session:
+        statement = select(Reservation).where(Reservation.status == status)
+        reservations = session.exec(statement).all()
+    return reservations
 
 def create_reservation_db(**kwargs):
     """
