@@ -3,11 +3,26 @@ from firebase_admin import credentials
 from firebase_admin import auth
 from functools import wraps
 import azure.functions as func
+import os
 import json
+import logging
 
 def firebase_config():
-    cred = credentials.Certificate("book2ball-6687d-firebase-adminsdk-xmhqo-728c024f44.json")
-    firebase_admin.initialize_app(cred)
+    try:
+        firebase_config_str = os.getenv("FIREBASE_CONFIG")
+        if not firebase_config_str:
+            raise ValueError("FIREBASE_CONFIG environment variable is not set")
+        
+        logging.info(f"FIREBASE_CONFIG: {firebase_config_str}")
+        
+        firebase_config = json.loads(firebase_config_str)
+        cred = credentials.Certificate(firebase_config)
+        firebase_admin.initialize_app(cred)
+        logging.info("Firebase initialized successfully")
+    except json.JSONDecodeError as e:
+        logging.error(f"JSON decode error: {e}")
+    except Exception as e:
+        logging.error(f"Error initializing Firebase: {e}")
 
 
 def firebase_auth(f):

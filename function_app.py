@@ -11,7 +11,8 @@ from auth.firebase_config import firebase_config
 from models.database import create_database_tables, engine
 
 
-app = func.FunctionApp()
+app = func.FunctionApp(http_auth_level=func.AuthLevel.ANONYMOUS)
+
 app.register_blueprint(bp_pitches)
 app.register_blueprint(bp_reservations)
 app.register_blueprint(bp_users)
@@ -22,11 +23,15 @@ app.register_blueprint(bp_auth)
 
 
 create_database_tables(engine)
-firebase_config()
+try:
+    firebase_config()
+    logging.info("Initialization successful")
+except Exception as e:
+    logging.error(f"Initialization failed: {e}")
 
-@app.route(route="status", auth_level=func.AuthLevel.ANONYMOUS)
+@app.function_name("book2ball")
+@app.route(route="status")
 def API(req: func.HttpRequest) -> func.HttpResponse:
-    logging.info('Python HTTP trigger function processed a request.')
     return func.HttpResponse(
         "API is running",
         status_code=200

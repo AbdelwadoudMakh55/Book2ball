@@ -10,14 +10,13 @@ from models.user import User
 from models.pitch_owner import PitchOwner
 from models.reservation import Reservation
 from alembic import context
-from os import getenv
-from dotenv import load_dotenv
+import os
+
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
-load_dotenv()
-database_url = getenv("DATABASE_URL")
+database_url = os.environ("ODBCConnectionString")
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.
 if config.config_file_name is not None:

@@ -9,6 +9,7 @@ from auth.firebase_config import firebase_auth
 bp_cities = func.Blueprint()
 
 @bp_cities.route('cities', methods=['GET', 'POST'])
+@firebase_auth
 def city(req: func.HttpRequest) -> func.HttpResponse:
     method = req.method
     if method == 'GET':

@@ -3,8 +3,8 @@ import requests
 from crud.user import *
 from crud.reservation import *
 from models.reservation import Status
-from datetime import datetime
 import json
+import os
 
 
 bp_auth = func.Blueprint()
@@ -21,9 +21,7 @@ def email_verification(req: func.HttpRequest) -> func.HttpResponse:
                 status_code=400
             )
 
-        with open('local.settings.json') as f:
-            settings = json.load(f)
-        api_key = settings.get('Values').get('FIREBASE_API_KEY')
+        api_key = os.environ['FIREBASE_API_KEY']
         url = f'https://identitytoolkit.googleapis.com/v1/accounts:update?key={api_key}'
         payload = {
             'oobCode': oob_code

@@ -10,12 +10,10 @@ from .city import City
 from .pitch_owner import PitchOwner
 from .reservation import Reservation
 from .review import Review
-import json
+import os
 
 
-with open('local.settings.json') as f:
-    data = json.load(f)
-    database_url = data["Values"]["ODBCConnectionString"]
+database_url = os.environ["ODBCConnectionString"]
 
 def create_engine_db():
     """Create the engine to connect to the database"""
