@@ -1,0 +1,71 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+.pitch-detail-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr; /* Three columns for details, map, and calendar */
+  gap: 3.25rem; /* Reduce the gap between the columns */
+  padding: 2rem;
+  font-family: 'Poppins', sans-serif;
+  background-color: #f9f9f9;
+}
+
+.pitch-detail {
+  text-align: left;
+  background-color: #e0e0e0; /* Placeholder for the map */
+  height: auto; /* Increase the height of the map */
+  border-radius: 8px;
+  width: 100%; /* Ensure the map takes the full width of the column */
+  padding: 1rem; /* Add padding to the map container */
+}
+
+.pitch-detail h2 {
+  margin-bottom: 1rem;
+  color: #2c3e50;
+}
+
+.pitch-detail img {
+  width: 100%;
+  height: auto;
+  max-height: 300px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.pitch-detail p {
+  margin: 0.5rem 0;
+  color: #666;
+  font-size: 1rem;
+}
+
+.pitch-detail .label {
+  font-weight: bold;
+  color: #2c3e50;
+}
+
+.pitch-detail .value {
+  font-weight: normal;
+  color: #27ae60;
+  font-size: 1.25rem;
+}
+
+.map-container {
+  background-color: #e0e0e0; /* Placeholder for the map */
+  height: auto; /* Increase the height of the map */
+  border-radius: 8px;
+  width: 100%; /* Ensure the map takes the full width of the column */
+  padding: 1rem; /* Add padding to the map container */
+}
+
+.map-title {
+  color: #2c3e50;
+  text-align: left; /* Align the title with the pitch name */
+}
+
+.calendar-container {
+  text-align: left;
+  background-color: #e0e0e0; /* Placeholder for the map */
+  height: auto; /* Increase the height of the map */
+  border-radius: 8px;
+  width: 100%; /* Ensure the map takes the full width of the column */
+  padding: 1rem; /* Add padding to the map container */
+}

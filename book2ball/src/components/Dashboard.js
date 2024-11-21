@@ -1,29 +1,42 @@
-import { useState, useEffect } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
+import axios from 'axios';
+import { useAuth } from '../contexts/AuthContext';
+import { Link } from 'react-router-dom';
 import './dashboard.css';
 
-const fakePitches = [
-  { id: 1, name: 'Pitch 1', location: 'Location 1' },
-  { id: 2, name: 'Pitch 2', location: 'Location 2' },
-  { id: 3, name: 'Pitch 3', location: 'Location 3' },
-  { id: 4, name: 'Pitch 4', location: 'Location 4' },
-  { id: 5, name: 'Pitch 5', location: 'Location 5' },
-  { id: 6, name: 'Pitch 6', location: 'Location 6' },
-  { id: 7, name: 'Pitch 7', location: 'Location 7' },
-  { id: 8, name: 'Pitch 8', location: 'Location 8' },
-  { id: 9, name: 'Pitch 9', location: 'Location 9' },
-  { id: 10, name: 'Pitch 10', location: 'Location 10' },
-  { id: 11, name: 'Pitch 11', location: 'Location 11' },
-];
-
-function Dashboard() {
+const Dashboard = () => {
   const [pitches, setPitches] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const pitchesPerPage = 10;
+  const pitchesPerPage = 5;
+  const { user, getToken } = useAuth();
+  const userId = user.uid;
+  const cityIdRef = useRef(0);
+  const cityName = useRef('');
 
   useEffect(() => {
-    // Directly set the fake data to the pitches state
-    setPitches(fakePitches);
-  }, []);
+    const fetchPitches = async () => {
+      try {
+        const token = getToken(); // Retrieve the JWT
+        const config = {
+          headers: { Authorization: `Bearer ${token}` }
+        };
+
+        const userResponse = await axios.get(`https://book2ball.azurewebsites.net/api/users/${userId}`, config);
+        cityIdRef.current = userResponse.data.city_id;
+
+        const cityResponse = await axios.get(`https://book2ball.azurewebsites.net/api/cities/${cityIdRef.current}`, config);
+        cityName.current = cityResponse.data.name;
+
+        const pitchesResponse = await axios.get(`https://book2ball.azurewebsites.net/api/cities/${cityIdRef.current}/pitches`, config);
+        console.log(pitchesResponse.data);
+        setPitches(pitchesResponse.data);
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+
+    fetchPitches();
+  }, [userId, getToken]);
 
   // Pagination logic
   const indexOfLastPitch = currentPage * pitchesPerPage;
@@ -34,24 +47,28 @@ function Dashboard() {
 
   return (
     <div className="dashboard">
-      <h2>Pitches</h2>
+      <h2>Pitches in {cityName.current}</h2>
       <div className="pitches">
         {currentPitches.map(pitch => (
-          <div key={pitch.id} className="pitch">
-            <h3>{pitch.name}</h3>
-            <p>{pitch.location}</p>
-          </div>
+          <Link to={`/pitch/${pitch.id}`} key={pitch.id} className="pitch-link">
+            <div className="pitch">
+              <h3>{pitch.name}</h3>
+              <img src="Terrain_6vs6_arena.jpg" alt={pitch.name} />
+              <p><span className="label">Capacity:</span> <span className="value">{pitch.capacity}</span></p>
+              <p><span className="label">Price:</span> <span className="value">{pitch.price} MAD</span></p>
+            </div>
+          </Link>
         ))}
       </div>
       <div className="pagination">
-        {Array.from({ length: Math.ceil(pitches.length / pitchesPerPage) }, (_, i) => (
-          <button key={i + 1} onClick={() => paginate(i + 1)} className={currentPage === i + 1 ? 'active' : ''}>
-            {i + 1}
+        {[...Array(Math.ceil(pitches.length / pitchesPerPage)).keys()].map(number => (
+          <button key={number + 1} onClick={() => paginate(number + 1)}>
+            {number + 1}
           </button>
         ))}
       </div>
     </div>
   );
-}
+};
 
 export default Dashboard;

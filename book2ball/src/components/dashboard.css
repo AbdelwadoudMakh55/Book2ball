@@ -3,12 +3,13 @@
 .dashboard {
   padding: 2rem;
   font-family: 'Poppins', sans-serif;
+  background-color: #f9f9f9;
 }
 
 .dashboard h2 {
   text-align: center;
   margin-bottom: 2rem;
-  color: #333;
+  color: #2c3e50;
 }
 
 .pitches {
@@ -18,27 +19,53 @@
 }
 
 .pitch {
-  background-color: #f9f9f9;
-  border: 1px solid #ddd;
+  background-color: #fff;
   border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+  transition: transform 0.2s;
+  text-align: center; /* Center the text */
   padding: 1rem;
-  text-align: center;
-  transition: transform 0.3s ease;
 }
 
 .pitch:hover {
   transform: translateY(-5px);
 }
 
+.pitch img {
+  width: 100%;
+  height: auto;
+  max-height: 200px; /* Adjust the max height as needed */
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+}
+
 .pitch h3 {
-  margin: 0;
-  font-size: 1.25rem;
-  color: #27ae60;
+  margin: 1rem 0;
+  font-size: 1.5rem;
+  color: #2c3e50;
 }
 
 .pitch p {
-  margin: 0.5rem 0 0;
+  margin: 0.5rem 0;
   color: #666;
+  font-size: 1rem;
+}
+
+.pitch .label {
+  font-weight: bold;
+  color: #2c3e50;
+}
+
+.pitch .value {
+  font-weight: normal;
+  color: #27ae60;
+  font-size: 1rem;
+}
+
+.pitch-link {
+  text-decoration: none;
 }
 
 .pagination {
@@ -49,19 +76,15 @@
 
 .pagination button {
   background-color: #27ae60;
-  color: white;
+  color: #fff;
   border: none;
   padding: 0.5rem 1rem;
   margin: 0 0.25rem;
-  border-radius: 5px;
+  border-radius: 4px;
   cursor: pointer;
-  transition: background-color 0.3s ease;
+  transition: background-color 0.2s;
 }
 
 .pagination button:hover {
-  background-color: #1e8449;
-}
-
-.pagination button.active {
   background-color: #1e8449;
 }

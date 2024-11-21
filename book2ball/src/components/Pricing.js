@@ -4,21 +4,21 @@ function Pricing() {
   const pricingPlans = [
     {
       id: 1,
-      title: 'Basic Plan',
-      price: '$20/hour',
-      features: ['1 Pitch', 'Up to 10 Players', 'Basic Amenities'],
+      title: '5vs5/6vs6 Pitch',
+      price: 'From 200 MAD/hour',
+      features: ['Up to 12 Players'],
     },
     {
       id: 2,
-      title: 'Standard Plan',
-      price: '$35/hour',
-      features: ['2 Pitches', 'Up to 20 Players', 'Standard Amenities'],
+      title: '7vs7/8vs8 Pitch',
+      price: 'From 300 MAD/hour',
+      features: ['Up to 16 Players'],
     },
     {
       id: 3,
-      title: 'Premium Plan',
-      price: '$50/hour',
-      features: ['3 Pitches', 'Up to 30 Players', 'Premium Amenities'],
+      title: '11vs11 Pitch',
+      price: 'From 1100 MAD/hour',
+      features: ['Up to 22 Players'],
     },
   ];
 

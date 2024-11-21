@@ -2,23 +2,28 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { auth } from '../config/firebase';
 import { signInWithEmailAndPassword } from 'firebase/auth';
+import { useAuth } from '../contexts/AuthContext';
 import './login.css';
 
 function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState(''); // State for error message
+  const [error, setError] = useState('');
   const navigate = useNavigate();
+  const { login } = useAuth();
 
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+      const token = await user.getIdToken(); // Get the JWT from Firebase
+      login(token); // Store the JWT using the useAuth hook
       // Redirect to the dashboard
       navigate('/dashboard');
     } catch (error) {
+      setError('Failed to log in');
       console.error('Error logging in:', error);
-      setError('Invalid email or password'); // Set error message
     }
   };
 

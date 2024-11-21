@@ -21,19 +21,26 @@ export const AuthProvider = ({ children }) => {
     return () => unsubscribe();
   }, []);
 
-  // Function to log in the user
-  const login = (userData) => {
-    setUser(userData);
+  // Function to log in the user and store the JWT
+  const login = (token) => {
+    localStorage.setItem('token', token);
+    setUser({ token });
   };
 
   // Function to log out the user
   const logout = async () => {
     await signOut(auth);
+    localStorage.removeItem('token');
     setUser(null);
   };
 
+  // Function to get the JWT
+  const getToken = () => {
+    return localStorage.getItem('token');
+  };
+
   return (
-    <AuthContext.Provider value={{ user, login, logout, loading }}>
+    <AuthContext.Provider value={{ user, login, logout, loading, getToken }}>
       {children}
     </AuthContext.Provider>
   );
