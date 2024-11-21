@@ -4,8 +4,8 @@ import os
 
 def send_email_for_reservation_verification(user: User, pitch_name: str, start_time: str, reservation_id: str):
     try:
-        api_key = os.environ["API_KEY"] 
-        endpoint = os.environ["ENDPOINT"]
+        api_key = os.getenv("API_KEY") 
+        endpoint = os.getenv("ENDPOINT")
         connection_string = f"endpoint={endpoint};accesskey={api_key}"
         verification_link = f"http://localhost:7071/api/verify-reservation?user_id={user.id}&reservation_id={reservation_id}"
         client = EmailClient.from_connection_string(connection_string)

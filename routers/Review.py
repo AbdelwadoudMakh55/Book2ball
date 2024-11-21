@@ -1,9 +1,12 @@
 import azure.functions as func
 import json
 from crud.review import *
+from services.firebase_config import firebase_auth
+
 
 bp_reviews = func.Blueprint()
-@bp_reviews.route('reviews', methods=['GET'])                     
+@bp_reviews.route('reviews', methods=['GET'])
+@firebase_auth
 def reviews(req: func.HttpRequest) -> func.HttpResponse:
     # Logic for handling GET request
     reviews = get_all_reviews()
@@ -15,6 +18,7 @@ def reviews(req: func.HttpRequest) -> func.HttpResponse:
     )
 
 @bp_reviews.route('reviews/{review_id}', methods=['GET'])
+@firebase_auth
 def review(req: func.HttpRequest) -> func.HttpResponse:
     review_id = req.route_params.get('review_id')
     # Logic for handling GET request

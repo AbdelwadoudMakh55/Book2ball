@@ -16,4 +16,5 @@ def timer_trigger(myTimer: func.TimerRequest) -> None:
     for reservation in reservations:
         if reservation.created_at + timedelta(minutes=10) < datetime.now():
             delete_reservation(reservation.id)
-    logging.info('Python timer trigger function executed.')
+            logging.info(f"Reservation {reservation.id} has been deleted due to timeout")
+    logging.info('Python timer trigger function executed')

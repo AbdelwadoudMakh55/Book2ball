@@ -4,7 +4,7 @@ from crud.city import *
 from crud.pitch import *
 from crud.user import *
 from crud.pitch_owner import *
-from auth.firebase_config import firebase_auth
+from services.firebase_config import firebase_auth
 
 bp_cities = func.Blueprint()
 
@@ -45,6 +45,7 @@ def handle_post(req: func.HttpRequest) -> func.HttpResponse:
         )
     
 @bp_cities.route('cities/{city_id}', methods=['GET', 'DELETE', 'PUT'])
+@firebase_auth
 def city_by_id(req: func.HttpRequest) -> func.HttpResponse:
     method = req.method
     city_id = req.route_params.get('city_id')
@@ -92,6 +93,7 @@ def handle_put(city_id, req: func.HttpRequest) -> func.HttpResponse:
         )
     
 @bp_cities.route('cities/{city_id}/pitches', methods=['GET'])
+@firebase_auth
 def pitches_by_city_id(req: func.HttpRequest) -> func.HttpResponse:
     city_id = req.route_params.get('city_id')
     city = get_city_by_id(city_id)
@@ -109,6 +111,7 @@ def pitches_by_city_id(req: func.HttpRequest) -> func.HttpResponse:
 
 # TODO: Test this route after adding pitches to the Database
 @bp_cities.route('cities/{city_id}/pitches/{pitch_id}', methods=['GET'])
+@firebase_auth
 def pitch_by_city_id(req: func.HttpRequest) -> func.HttpResponse:
     city_id = req.route_params.get('city_id')
     pitch_id = req.route_params.get('pitch_id')

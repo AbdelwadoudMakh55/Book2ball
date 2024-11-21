@@ -3,6 +3,7 @@ import json
 from crud.user import *
 from crud.city import *
 from crud.reservation import *
+from services.firebase_config import firebase_auth
 
 bp_users = func.Blueprint()
 @bp_users.route('users', methods=['GET', 'POST'])
@@ -58,6 +59,7 @@ def user(req: func.HttpRequest) -> func.HttpResponse:
         )
 
 @bp_users.route('users/{user_id}', methods=['GET', 'DELETE'])
+@firebase_auth
 def user_by_id(req: func.HttpRequest) -> func.HttpResponse:
     method = req.method
     user_id = req.route_params.get('user_id')
@@ -80,6 +82,7 @@ def user_by_id(req: func.HttpRequest) -> func.HttpResponse:
     )
 
 @bp_users.route('users/{user_id}/reservations', methods=['GET'])
+@firebase_auth
 def user_reservations(req: func.HttpRequest) -> func.HttpResponse:
     user_id = req.route_params.get('user_id')
     user = get_user_by_id(user_id)
@@ -96,6 +99,7 @@ def user_reservations(req: func.HttpRequest) -> func.HttpResponse:
     )
 
 @bp_users.route('users/{user_id}/reservations/{reservation_id}', methods=['GET'])
+@firebase_auth
 def user_reservation(req: func.HttpRequest) -> func.HttpResponse:
     user_id = req.route_params.get('user_id')
     reservation_id = req.route_params.get('reservation_id')

@@ -11,7 +11,7 @@ def firebase_config():
     try:
         firebase_config_str = os.getenv("FIREBASE_CONFIG")
         if not firebase_config_str:
-            raise ValueError("FIREBASE_CONFIG environment variable is not set")
+            logging.error("FIREBASE_CONFIG environment variable is not set")
         
         logging.info(f"FIREBASE_CONFIG: {firebase_config_str}")
         
@@ -19,8 +19,6 @@ def firebase_config():
         cred = credentials.Certificate(firebase_config)
         firebase_admin.initialize_app(cred)
         logging.info("Firebase initialized successfully")
-    except json.JSONDecodeError as e:
-        logging.error(f"JSON decode error: {e}")
     except Exception as e:
         logging.error(f"Error initializing Firebase: {e}")
 

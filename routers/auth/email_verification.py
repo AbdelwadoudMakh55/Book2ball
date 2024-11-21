@@ -21,7 +21,7 @@ def email_verification(req: func.HttpRequest) -> func.HttpResponse:
                 status_code=400
             )
 
-        api_key = os.environ['FIREBASE_API_KEY']
+        api_key = os.getenv('FIREBASE_API_KEY')
         url = f'https://identitytoolkit.googleapis.com/v1/accounts:update?key={api_key}'
         payload = {
             'oobCode': oob_code
@@ -39,13 +39,13 @@ def email_verification(req: func.HttpRequest) -> func.HttpResponse:
         user_id = user.id
         update_user(user_id, is_verified=True)
         return func.HttpResponse(
-            json.dumps({"message": "Email verified and user updated in database"}),
+            json.dumps({"message": "Email verified successfully"}),
             mimetype="application/json",
             status_code=200
         )
     except Exception as e:
         return func.HttpResponse(
-            json.dumps({"error": str(e)}),
+            json.dumps({"ERROR": str(e)}),
             mimetype="application/json",
             status_code=400
         )

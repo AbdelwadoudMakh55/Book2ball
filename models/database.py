@@ -13,7 +13,7 @@ from .review import Review
 import os
 
 
-database_url = os.environ["ODBCConnectionString"]
+database_url = os.getenv("ODBCConnectionString")
 
 def create_engine_db():
     """Create the engine to connect to the database"""
