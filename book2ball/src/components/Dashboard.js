@@ -16,11 +16,10 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchPitches = async () => {
       try {
-        const token = getToken(); // Retrieve the JWT
+        const token = getToken();
         const config = {
           headers: { Authorization: `Bearer ${token}` }
         };
-
         const userResponse = await axios.get(`https://book2ball.azurewebsites.net/api/users/${userId}`, config);
         cityIdRef.current = userResponse.data.city_id;
 

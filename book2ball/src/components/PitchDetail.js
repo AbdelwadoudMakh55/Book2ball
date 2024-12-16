@@ -10,11 +10,11 @@ const PitchDetail = () => {
   const { pitchId } = useParams();
   const [pitch, setPitch] = useState(null);
   const { user, getToken } = useAuth();
-  const userId = user.uid;
 
   useEffect(() => {
+    const token = getToken();
     const config = {
-      headers: { Authorization: `Bearer ${getToken()}` }
+      headers: { Authorization: `Bearer ${token}` }
     };
     const fetchPitch = async () => {
       try {
@@ -26,7 +26,7 @@ const PitchDetail = () => {
     };
 
     fetchPitch();
-  }, [pitchId]);
+  }, [pitchId, getToken, user]);
 
   if (!pitch) {
     return <div>Loading...</div>;

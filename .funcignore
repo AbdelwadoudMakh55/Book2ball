@@ -4,7 +4,6 @@ __pycache__/*
 .vscode/*
 local.settings.json
 Book2ball_Architecture.png
-book2ball-6687d-firebase-adminsdk-xmhqo-728c024f44.json
 models/__pycache__/*
 crud/__pycache__/*
 routers/__pycache__/*
@@ -13,3 +12,4 @@ external_services/__pycache__/*
 alembic/__pycache__/*
 alembic/versions/__pycache__/*
 models/data_scripts/*
+book2ball-6687d-firebase-adminsdk-xmhqo-728c024f44.json

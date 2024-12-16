@@ -8,11 +8,13 @@ from routers.PitchOwner import bp_pitch_owners
 from routers.City import bp_cities
 from services.time_trigger_reservations import bp_time_trigger
 from routers.auth.email_verification import bp_auth
-from services.firebase_config import firebase_config
 from models.database import create_database_tables, engine
+from services.firebase_config import firebase_config
 
 
+firebase_config()
 app = func.FunctionApp(http_auth_level=func.AuthLevel.ANONYMOUS)
+
 
 app.register_blueprint(bp_pitches)
 app.register_blueprint(bp_reservations)
@@ -23,13 +25,7 @@ app.register_blueprint(bp_cities)
 app.register_blueprint(bp_auth)
 app.register_blueprint(bp_time_trigger)
 
-
 create_database_tables(engine)
-try:
-    firebase_config()
-    logging.info("Initialization successful")
-except Exception as e:
-    logging.error(f"Initialization failed: {e}")
 
 @app.function_name("book2ball")
 @app.route(route="status")
