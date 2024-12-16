@@ -68,7 +68,6 @@ def handle_post(req: func.HttpRequest) -> func.HttpResponse:
         )
     
 @bp_pitch_owners.route('pitch-owners/{pitch_owner_id}', methods=['GET', 'DELETE', 'PUT'])
-@firebase_auth
 def pitch_owner_by_id(req: func.HttpRequest) -> func.HttpResponse:
     method = req.method
     pitch_owner_id = req.route_params.get('pitch_owner_id')
@@ -141,7 +140,6 @@ def handle_put(pitch_owner_id: str, req: func.HttpRequest) -> func.HttpResponse:
         )
     
 @bp_pitch_owners.route('pitch-owners/{pitch_owner_id}/pitches', methods=['GET'])
-@firebase_auth
 def pitches_by_pitch_owner_id(req: func.HttpRequest) -> func.HttpResponse:
     pitch_owner_id = req.route_params.get('pitch_owner_id')
     pitch_owner = get_pitch_owner_by_id(pitch_owner_id)
@@ -159,7 +157,6 @@ def pitches_by_pitch_owner_id(req: func.HttpRequest) -> func.HttpResponse:
 
 # TODO: Implement logic for posting Pitch to the database and saving the images in Blob Storage
 @bp_pitch_owners.route('pitch-owners/{pitch_owner_id}/pitches', methods=['POST'])
-@firebase_auth
 def create_pitch(req: func.HttpRequest) -> func.HttpResponse:
     pitch_owner_id = req.route_params.get('pitch_owner_id')
     pitch_owner = pitch_owner_by_id(pitch_owner_id)
@@ -214,7 +211,6 @@ def create_pitch(req: func.HttpRequest) -> func.HttpResponse:
         )
 
 @bp_pitch_owners.route('pitch-owners/{pitch_owner_id}/pitches/{pitch_id}', methods=['GET'])
-@firebase_auth
 def pitch_by_pitch_owner_id(req: func.HttpRequest) -> func.HttpResponse:
     pitch_owner_id = req.route_params.get('pitch_owner_id')
     pitch_id = req.route_params.get('pitch_id')

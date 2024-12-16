@@ -9,7 +9,6 @@ from datetime import datetime, timedelta
 
 bp_reservations = func.Blueprint()
 @bp_reservations.route('reservations', methods=['GET'])
-@firebase_auth
 def reservation(req: func.HttpRequest) -> func.HttpResponse:
     reservations = get_all_reservations()
     return func.HttpResponse(
@@ -19,7 +18,6 @@ def reservation(req: func.HttpRequest) -> func.HttpResponse:
     )
 
 @bp_reservations.route('reservations/{pitch_id}', methods=['POST'])
-@firebase_auth
 def create_reservation(req: func.HttpRequest) -> func.HttpResponse:
     pitch_id = req.route_params.get('pitch_id')
     pitch = get_pitch_by_id(pitch_id)
@@ -92,7 +90,6 @@ def create_reservation(req: func.HttpRequest) -> func.HttpResponse:
         )
 
 @bp_reservations.route('reservations/{reservation_id}', methods=['GET'])
-@firebase_auth
 def reservation_by_id(req: func.HttpRequest) -> func.HttpResponse:
     reservation_id = req.route_params.get('reservation_id')
     reservation = get_reservation_by_id(reservation_id)

@@ -2,22 +2,41 @@ import React, { useState } from 'react';
 import { Calendar, momentLocalizer } from 'react-big-calendar';
 import moment from 'moment';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
+import axios from 'axios';
+import { useAuth } from '../contexts/AuthContext';
 
 const localizer = momentLocalizer(moment);
 
-const CalendarComponent = () => {
+const CalendarComponent = ({ pitchId }) => {
   const [events, setEvents] = useState([]);
+  const { user, getToken } = useAuth();
 
-  const handleSelectSlot = ({ start, end }) => {
+  const handleSelectSlot = async ({ start, end }) => {
     const isBooked = events.some(event => 
       (start >= event.start && start < event.end) || 
       (end > event.start && end <= event.end)
     );
 
     if (!isBooked) {
-      // Handle booking logic here
-      console.log('Selected slot:', start, end);
-      setEvents([...events, { start, end, title: 'Booked' }]);
+      try {
+        const token = getToken();
+        const config = {
+          headers: { Authorization: `Bearer ${token}` }
+        };
+        const response = await axios.post(
+          `https://book2ball.azurewebsites.net/api/reservations/${pitchId}`,
+          {
+            user_id: user.uid,
+            start_time: moment(start).format('YYYY-MM-DD HH:mm:ss')
+          },
+          config
+        );
+        setEvents([...events, { start, end, title: 'Booked' }]);
+        alert('Reservation successful');
+      } catch (error) {
+        console.error('Error creating reservation:', error);
+        alert('Failed to create reservation');
+      }
     } else {
       alert('This time slot is already booked.');
     }
