@@ -4,14 +4,11 @@ import os
 
 def send_email_for_reservation_verification(user: User, pitch_name: str, start_time: str, reservation_id: str):
     try:
-        api_key = os.getenv("API_KEY") 
-        endpoint = os.getenv("ENDPOINT")
-        connection_string = f"endpoint={endpoint};accesskey={api_key}"
-        verification_link = f"http://localhost:7071/api/verify-reservation?user_id={user.id}&reservation_id={reservation_id}"
+        connection_string = os.getenv("CONNECTION_STRING")
+        verification_link = f"https://book2ball.azurewebsites.net/api/verify-reservation?user_id={user.id}&reservation_id={reservation_id}"
         client = EmailClient.from_connection_string(connection_string)
-
         message = {
-            "senderAddress": "DoNotReply@79f6f715-eb45-4f9a-a9c7-019d34148c88.azurecomm.net",
+            "senderAddress": "DoNotReply@1cecbadf-c87b-48c6-a6bd-eddca56380c3.azurecomm.net",
             "recipients": {
                 "to": [{"address": user.email}]
             },
@@ -31,13 +28,11 @@ def send_email_for_reservation_verification(user: User, pitch_name: str, start_t
                     </body>
                 </html>
                 """
-            },
-            
+            },   
         }
-
         poller = client.begin_send(message)
         result = poller.result()
-        print("Message sent: ", result)
+        return str(result.message_id)
 
     except Exception as ex:
-        print(ex)
+        return str(ex)

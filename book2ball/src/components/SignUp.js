@@ -28,7 +28,7 @@ function SignUp() {
       const user = userCredential.user;
       await sendEmailVerification(user);
       alert('Verification email sent. Please check your inbox.');
-      axios.post('http://localhost:7071/api/users', {
+      axios.post('https://book2ball.azurewebsites.net/api/users', {
         id: user.uid,
         name: fullName,
         email,

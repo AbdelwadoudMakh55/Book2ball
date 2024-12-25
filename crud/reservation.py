@@ -7,6 +7,8 @@ from models.database import engine
 from sqlmodel import Session, select
 from datetime import datetime
 
+time = "%Y-%m-%dT%H:%M:%S.%f"
+
 
 def get_all_reservations():
     """
@@ -37,13 +39,20 @@ def get_reservations_by_user_id(user_id: str):
         reservations = [reservation.to_dict() for reservation in reservations]
     return reservations
 
-def get_reservations_by_pitch_id(pitch_id: str):
+def get_reservations_by_pitch_id(pitch_id: str, date: str = None):
     """
     Get reservations by pitch id
     """
     with Session(engine) as session:
         statement = select(Reservation).where(Reservation.pitch_id == pitch_id)
         reservations = session.exec(statement).all()
+        pitch_reservations_by_day = []
+        if date:
+            for reservation in reservations:
+                start_time = datetime.strptime(reservation.start_time, time)
+                if start_time.date() != datetime.strptime(date, "%Y-%m-%d").date():
+                    pitch_reservations_by_day.append(reservation)
+            return pitch_reservations_by_day
     return reservations
 
 def get_reservation_by_start_time(pitch_id: str, start_time: str):

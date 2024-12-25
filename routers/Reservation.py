@@ -16,6 +16,23 @@ def reservation(req: func.HttpRequest) -> func.HttpResponse:
         mimetype="application/json",
         status_code=200
     )
+    
+@bp_reservations.route('reservations/{pitch_id}/{date}')
+def reservations_today(req: func.HttpRequest) -> func.HttpResponse:
+    pitch_id = req.route_params.get('pitch_id')
+    date = req.route_params.get('date')
+    pitch = get_pitch_by_id(pitch_id)
+    if not pitch:
+        return func.HttpResponse(
+            "Pitch not found",
+            status_code=404
+        )
+    reservations = get_reservations_by_pitch_id(pitch_id, date)
+    return func.HttpResponse(
+        body=json.dumps(reservations),
+        mimetype="application/json",
+        status_code=200
+    )
 
 @bp_reservations.route('reservations/{pitch_id}', methods=['POST'])
 def create_reservation(req: func.HttpRequest) -> func.HttpResponse:
@@ -72,17 +89,17 @@ def create_reservation(req: func.HttpRequest) -> func.HttpResponse:
         req_body['start_time'] = start_time
         try:
             new_reservation = create_reservation_db(**req_body)
-            send_email_for_reservation_verification(user, pitch.name, start_time_str, new_reservation.id)
+            result = send_email_for_reservation_verification(user, pitch.name, start_time_str, new_reservation.id)
+            return func.HttpResponse(
+                body=json.dumps(result),
+                mimetype="application/json",
+                status_code=201
+            )
         except Exception as e:
             return func.HttpResponse(
                 f"Failed to create reservation: {e}",
                 status_code=500
             )
-        return func.HttpResponse(
-            body=json.dumps(new_reservation.to_dict()),
-            mimetype="application/json",
-            status_code=201
-        )
     except ValueError as e:
         return func.HttpResponse(
             f"Invalid request body: {e}",

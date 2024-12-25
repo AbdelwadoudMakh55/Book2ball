@@ -159,7 +159,7 @@ def pitches_by_pitch_owner_id(req: func.HttpRequest) -> func.HttpResponse:
 @bp_pitch_owners.route('pitch-owners/{pitch_owner_id}/pitches', methods=['POST'])
 def create_pitch(req: func.HttpRequest) -> func.HttpResponse:
     pitch_owner_id = req.route_params.get('pitch_owner_id')
-    pitch_owner = pitch_owner_by_id(pitch_owner_id)
+    pitch_owner = get_pitch_owner_by_id(pitch_owner_id)
     if not pitch_owner:
         return func.HttpResponse(
             "Pitch owner not found",
@@ -195,10 +195,14 @@ def create_pitch(req: func.HttpRequest) -> func.HttpResponse:
                 "Missing required field: city_id",
                 status_code=400
             )
+        if 'price' not in req_body:
+            return func.HttpResponse(
+                "Missing Price",
+                status_code=400
+            )
         req_body['pitchOwner_id'] = pitch_owner_id
-        new_pitch = Pitch(**req_body)
         # Save the new pitch to the database
-        new_pitch = create_pitch_db(new_pitch)
+        new_pitch = create_pitch_db(**req_body)
         return func.HttpResponse(
             body=json.dumps(new_pitch.to_dict()),
             mimetype="application/json",

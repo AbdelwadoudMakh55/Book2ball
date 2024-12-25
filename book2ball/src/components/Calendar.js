@@ -29,9 +29,9 @@ const CalendarComponent = ({ pitchId }) => {
             user_id: user.uid,
             start_time: moment(start).format('YYYY-MM-DD HH:mm:ss')
           },
-          config
         );
         setEvents([...events, { start, end, title: 'Booked' }]);
+        console.log(response)
         alert('Reservation successful');
       } catch (error) {
         console.error('Error creating reservation:', error);
