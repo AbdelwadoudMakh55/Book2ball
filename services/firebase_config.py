@@ -17,36 +17,25 @@ def firebase_config():
     except Exception as e:
         logging.error(f"Error initializing Firebase: {str(e)}")
 
-def firebase_auth(f) -> func.HttpResponse:
-    @wraps(f)
-    def wrapper(req: func.HttpRequest, *args, **kwargs):
+
+def firebase_auth():
+    def middleware(req: func.HttpRequest) -> func.HttpResponse:
+        # Extract the Authorization header
         auth_header = req.headers.get('Authorization')
-        if not auth_header:
+        if not auth_header or not auth_header.startswith('Bearer '):
             return func.HttpResponse(
-                body=json.dumps({"error": "Authorization header is missing"}),
-                mimetype="application/json",
+                "Missing or invalid Authorization header",
                 status_code=401
             )
         try:
+            # Extract the token and verify it
             token = auth_header.split(" ")[1]
             decoded_token = auth.verify_id_token(token)
+            return decoded_token  # If no response is returned, the request proceeds
         except auth.InvalidIdTokenError:
-            return func.HttpResponse(
-                body=json.dumps({"error": "Invalid token"}),
-                mimetype="application/json",
-                status_code=401
-            )
+            return func.HttpResponse("Invalid token", status_code=401)
         except auth.ExpiredIdTokenError:
-            return func.HttpResponse(
-                body=json.dumps({"error": "Token expired"}),
-                mimetype="application/json",
-                status_code=401
-            )
+            return func.HttpResponse("Expired token", status_code=401)
         except Exception as e:
-            return func.HttpResponse(
-                body=json.dumps({"error": str(e)}),
-                mimetype="application/json",
-                status_code=401
-            )
-        return f(req, *args, **kwargs)
-    return wrapper
+            return func.HttpResponse(f"Authentication failed: {str(e)}", status_code=401)
+    return middleware

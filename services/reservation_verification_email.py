@@ -32,7 +32,6 @@ def send_email_for_reservation_verification(user: User, pitch_name: str, start_t
         }
         poller = client.begin_send(message)
         result = poller.result()
-        return str(result.message_id)
 
     except Exception as ex:
         return str(ex)

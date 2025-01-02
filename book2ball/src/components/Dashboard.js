@@ -7,35 +7,63 @@ import './dashboard.css';
 const Dashboard = () => {
   const [pitches, setPitches] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const pitchesPerPage = 5;
+  const [pitchesPerPage, setPitchesPerPage] = useState(5);
   const { user, getToken } = useAuth();
   const userId = user.uid;
-  const cityIdRef = useRef(0);
-  const cityName = useRef('');
 
   useEffect(() => {
-    const fetchPitches = async () => {
+    const fetchPitchesByLocation = async (latitude, longitude) => {
       try {
         const token = getToken();
         const config = {
           headers: { Authorization: `Bearer ${token}` }
         };
-        const userResponse = await axios.get(`https://book2ball.azurewebsites.net/api/users/${userId}`, config);
-        cityIdRef.current = userResponse.data.city_id;
-
-        const cityResponse = await axios.get(`https://book2ball.azurewebsites.net/api/cities/${cityIdRef.current}`, config);
-        cityName.current = cityResponse.data.name;
-
-        const pitchesResponse = await axios.get(`https://book2ball.azurewebsites.net/api/cities/${cityIdRef.current}/pitches`, config);
-        console.log(pitchesResponse.data);
-        setPitches(pitchesResponse.data);
+        const response = await axios.get(`http://localhost:7071/api/pitches?lat=${latitude}&long=${longitude}`, config);
+        setPitches(response.data);
       } catch (error) {
-        console.error('Error fetching data:', error);
+        console.error('Error fetching pitches:', error);
       }
     };
 
-    fetchPitches();
-  }, [userId, getToken]);
+    const getUserLocation = () => {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            const latitude = position.coords.latitude;
+            const longitude = position.coords.longitude;
+            fetchPitchesByLocation(latitude, longitude);
+          },
+          (error) => {
+            console.error('Error getting user location:', error);
+          }
+        );
+      } else {
+        console.error('Geolocation is not supported by this browser.');
+      }
+    };
+
+    getUserLocation();
+  }, [getToken]);
+
+  useEffect(() => {
+    const updatePitchesPerPage = () => {
+      const width = window.innerWidth;
+      if (width >= 1200) {
+        setPitchesPerPage(10);
+      } else if (width >= 992) {
+        setPitchesPerPage(8);
+      } else if (width >= 768) {
+        setPitchesPerPage(6);
+      } else {
+        setPitchesPerPage(4);
+      }
+    };
+
+    updatePitchesPerPage();
+    window.addEventListener('resize', updatePitchesPerPage);
+
+    return () => window.removeEventListener('resize', updatePitchesPerPage);
+  }, []);
 
   // Pagination logic
   const indexOfLastPitch = currentPage * pitchesPerPage;
@@ -46,7 +74,7 @@ const Dashboard = () => {
 
   return (
     <div className="dashboard">
-      <h2>Pitches in {cityName.current}</h2>
+      <h2>Pitches near you</h2>
       <div className="pitches">
         {currentPitches.map(pitch => (
           <Link to={`/pitch/${pitch.id}`} key={pitch.id} className="pitch-link">
@@ -60,9 +88,13 @@ const Dashboard = () => {
         ))}
       </div>
       <div className="pagination">
-        {[...Array(Math.ceil(pitches.length / pitchesPerPage)).keys()].map(number => (
-          <button key={number + 1} onClick={() => paginate(number + 1)}>
-            {number + 1}
+        {Array.from({ length: Math.ceil(pitches.length / pitchesPerPage) }, (_, index) => (
+          <button
+            key={index + 1}
+            onClick={() => paginate(index + 1)}
+            disabled={currentPage === index + 1}
+          >
+            {index + 1}
           </button>
         ))}
       </div>
@@ -70,4 +102,4 @@ const Dashboard = () => {
   );
 };
 
-export default Dashboard;
+export default Dashboard; 

@@ -26,6 +26,7 @@ app.register_blueprint(bp_auth)
 app.register_blueprint(bp_time_trigger)
 
 create_database_tables(engine)
+firebase_config()
 
 @app.function_name("book2ball")
 @app.route(route="status")

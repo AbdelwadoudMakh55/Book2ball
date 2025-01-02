@@ -24,6 +24,8 @@ class Pitch(BaseModel, table=True):
     """Class of Pitch Objects"""
     
     name: str = Field(default=None, nullable=False)
+    latitude: float = Field(default=0, nullable=False)
+    longitude: float = Field(default=0, nullable=False)
     location: str = Field(default=None, nullable=False)
     capacity: Capacity = Field(default=None, nullable=False)
     price: int = Field(default=None, nullable=False)
