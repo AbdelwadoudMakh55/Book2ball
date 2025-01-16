@@ -28,7 +28,7 @@ def reservations_today(req: func.HttpRequest) -> func.HttpResponse:
         )
     reservations = get_reservations_by_pitch_id(pitch_id, date)
     return func.HttpResponse(
-        body=json.dumps(reservations),
+        body=json.dumps([res.to_dict() for res in reservations]),
         mimetype="application/json",
         status_code=200
     )

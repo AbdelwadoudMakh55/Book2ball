@@ -11,48 +11,25 @@ from math import radians, cos, sin, sqrt, atan2
 
 bp_pitches = func.Blueprint()
 
-@bp_pitches.route('pitches', methods=['GET'], auth_level=func.AuthLevel.FUNCTION)
-def pitches_by_location(req: func.HttpRequest) -> func.HttpResponse:
-    auth_response = firebase_auth()(req)
-    if isinstance(auth_response, func.HttpResponse):
-        return auth_response
-    
-    try:
-        latitude = float(req.params.get('lat'))
-        longitude = float(req.params.get('long'))
-    except (TypeError, ValueError):
-        return func.HttpResponse(
-            "Invalid latitude or longitude",
-            status_code=400
-        )
 
-    pitches = get_all_pitches()
-    closest_pitches = sorted(pitches, key=lambda pitch: distance(latitude, longitude, pitch['latitude'], pitch['longitude']))
-
-    return func.HttpResponse(
-        body=json.dumps(closest_pitches),
-        mimetype="application/json",
-        status_code=200
-    )
-
-def distance(lat1, lon1, lat2, lon2):
-    # Haversine formula to calculate the distance between two points on the Earth
-    R = 6371.0  # Earth radius in kilometers
-
-    dlat = radians(lat2 - lat1)
-    dlon = radians(lon2 - lon1)
-    a = sin(dlat / 2)**2 + cos(radians(lat1)) * cos(radians(lat2)) * sin(dlon / 2)**2
-    c = 2 * atan2(sqrt(a), sqrt(1 - a))
-
-    return R * c
-
-
-@bp_pitches.route('pitches/{pitch_id?}', methods=['GET'], auth_level=func.AuthLevel.FUNCTION)
+@bp_pitches.route('pitches/{pitch_id?}', methods=['GET'])
 def pitch(req: func.HttpRequest) -> func.HttpResponse:
-    auth_response = firebase_auth()(req)
-    if isinstance(auth_response, func.HttpResponse):
-        return auth_response
-
+    if req.params.get('lat') and req.params.get('long'):
+        try:
+            latitude = float(req.params.get('lat'))
+            longitude = float(req.params.get('long'))
+        except (TypeError, ValueError):
+            return func.HttpResponse(
+                "Invalid latitude or longitude",
+                status_code=400
+            )
+        pitches = get_all_pitches()
+        closest_pitches = sorted(pitches, key=lambda pitch: distance(latitude, longitude, pitch['latitude'], pitch['longitude']))
+        return func.HttpResponse(
+            body=json.dumps(closest_pitches),
+            mimetype="application/json",
+            status_code=200
+        )
     pitch_id = req.route_params.get('pitch_id')
     if not pitch_id:
         return func.HttpResponse(
@@ -106,12 +83,8 @@ def reservations_by_pitch_id(req: func.HttpRequest) -> func.HttpResponse:
         status_code=200
     )
     
-@bp_pitches.route('pitches/{pitch_id}/reservations', methods=['POST'], auth_level=func.AuthLevel.FUNCTION)
+@bp_pitches.route('pitches/{pitch_id}/reservations', methods=['POST'])
 def create_reservation(req: func.HttpRequest) -> func.HttpResponse:
-    auth_response = firebase_auth()(req)
-    if isinstance(auth_response, func.HttpResponse):
-        return auth_response
-
     pitch_id = req.route_params.get('pitch_id')
     pitch = get_pitch_by_id(pitch_id)
     if not pitch:
@@ -181,3 +154,15 @@ def create_reservation(req: func.HttpRequest) -> func.HttpResponse:
             f"Invalid request body: {e}",
             status_code=400
         )
+        
+        
+def distance(lat1, lon1, lat2, lon2):
+    # Haversine formula to calculate the distance between two points on the Earth
+    R = 6371.0  # Earth radius in kilometers
+
+    dlat = radians(lat2 - lat1)
+    dlon = radians(lon2 - lon1)
+    a = sin(dlat / 2)**2 + cos(radians(lat1)) * cos(radians(lat2)) * sin(dlon / 2)**2
+    c = 2 * atan2(sqrt(a), sqrt(1 - a))
+
+    return R * c

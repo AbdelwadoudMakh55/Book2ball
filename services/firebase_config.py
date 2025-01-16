@@ -1,7 +1,6 @@
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import auth
-from functools import wraps
 import azure.functions as func
 import os
 import json
@@ -31,7 +30,7 @@ def firebase_auth():
             # Extract the token and verify it
             token = auth_header.split(" ")[1]
             decoded_token = auth.verify_id_token(token)
-            return decoded_token  # If no response is returned, the request proceeds
+            # If no response is returned, the request proceeds
         except auth.InvalidIdTokenError:
             return func.HttpResponse("Invalid token", status_code=401)
         except auth.ExpiredIdTokenError:

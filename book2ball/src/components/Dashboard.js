@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
 import { Link } from 'react-router-dom';
@@ -9,19 +9,30 @@ const Dashboard = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [pitchesPerPage, setPitchesPerPage] = useState(5);
   const { user, getToken } = useAuth();
-  const userId = user.uid;
+  const userId = user ? user.uid : null;
 
   useEffect(() => {
     const fetchPitchesByLocation = async (latitude, longitude) => {
       try {
-        const token = getToken();
+        const token = await getToken(); // Get the token from AuthContext
+        if (!token) {
+          console.error('No token available');
+          return;
+        }
+        console.log('Token:', token);
         const config = {
           headers: { Authorization: `Bearer ${token}` }
         };
-        const response = await axios.get(`http://localhost:7071/api/pitches?lat=${latitude}&long=${longitude}`, config);
-        setPitches(response.data);
+        const response = await axios.get(`https://book2ball.azurewebsites.net/api/pitches?lat=${latitude}&long=${longitude}`, config);
+        console.log('Response:', response);
+        setPitches(response.data); // Update state with retrieved pitches
       } catch (error) {
         console.error('Error fetching pitches:', error);
+        if (error.response) {
+          console.error('Response data:', error.response.data);
+          console.error('Response status:', error.response.status);
+          console.error('Response headers:', error.response.headers);
+        }
       }
     };
 
@@ -102,4 +113,4 @@ const Dashboard = () => {
   );
 };
 
-export default Dashboard; 
+export default Dashboard;

@@ -13,6 +13,7 @@ import SignUp from './components/SignUp';
 import Dashboard from './components/Dashboard';
 import PitchDetail from './components/PitchDetail';
 import ProtectedRoute from './components/ProtectedRoute';
+import UserReservations from './components/UserReservations';
 import './App.css';
 
 function App() {
@@ -35,6 +36,7 @@ function App() {
               <Route path="/signup" element={<SignUp />} />
               <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
               <Route path="/pitch/:pitchId" element={<ProtectedRoute><PitchDetail /></ProtectedRoute>} />
+              <Route path="/reservations" element={<ProtectedRoute><UserReservations /></ProtectedRoute>} />
             </Routes>
           </main>
           <Footer />
