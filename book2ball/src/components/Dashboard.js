@@ -19,7 +19,6 @@ const Dashboard = () => {
           console.error('No token available');
           return;
         }
-        console.log('Token:', token);
         const config = {
           headers: { Authorization: `Bearer ${token}` }
         };

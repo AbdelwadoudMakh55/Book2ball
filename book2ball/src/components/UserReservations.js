@@ -9,6 +9,7 @@ const UserReservations = () => {
   const [nextReservation, setNextReservation] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [reservationsPerPage] = useState(5);
+  const [pitchNames, setPitchNames] = useState({});
   const { user, getToken } = useAuth();
 
   useEffect(() => {
@@ -23,8 +24,21 @@ const UserReservations = () => {
         const upcomingReservation = sortedReservations.find(reservation => new Date(reservation.start_time) > new Date());
         setNextReservation(upcomingReservation);
         setReservations(sortedReservations.filter(reservation => reservation !== upcomingReservation));
+
+        // Fetch pitch names
+        const pitchIds = sortedReservations.map(reservation => reservation.pitch_id);
+        const uniquePitchIds = [...new Set(pitchIds)];
+        const pitchNamesResponse = await Promise.all(uniquePitchIds.map(async (pitchId) => {
+          const pitchResponse = await axios.get(`https://book2ball.azurewebsites.net/api/pitches/${pitchId}`, config);
+          return { pitchId, name: pitchResponse.data.name };
+        }));
+        const pitchNamesMap = pitchNamesResponse.reduce((acc, { pitchId, name }) => {
+          acc[pitchId] = name;
+          return acc;
+        }, {});
+        setPitchNames(pitchNamesMap);
       } catch (error) {
-        console.error('Error fetching reservations:', error);
+        console.error('Error fetching reservations or pitch names:', error);
       }
     };
 
@@ -50,7 +64,7 @@ const UserReservations = () => {
         <h2>Next Reservation</h2>
         {nextReservation ? (
           <>
-            <p><span className="label">Pitch:</span> <span className="value">{nextReservation.pitch.name}</span></p>
+            <p><span className="label">Pitch:</span> <span className="value">{pitchNames[nextReservation.pitch_id]}</span></p>
             <p><span className="label">Time:</span> <span className="value">{moment(nextReservation.start_time).format('MMMM Do YYYY, h:mm:ss a')}</span></p>
             <p><span className="label">Countdown:</span> <span className="value">{renderCountdown(nextReservation.start_time)}</span></p>
           </>
@@ -63,7 +77,7 @@ const UserReservations = () => {
         {currentReservations.length > 0 ? (
           currentReservations.map(reservation => (
             <div key={reservation.id} className="reservation">
-              <p><span className="label">Pitch:</span> <span className="value">{reservation.pitch_id}</span></p>
+              <p><span className="label">Pitch:</span> <span className="value">{pitchNames[reservation.pitch_id]}</span></p>
               <p><span className="label">Time:</span> <span className="value">{moment(reservation.start_time).format('MMMM Do YYYY, h:mm:ss a')}</span></p>
             </div>
           ))

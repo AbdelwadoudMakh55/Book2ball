@@ -12,7 +12,7 @@ from models.database import create_database_tables, engine
 from services.firebase_config import firebase_config
 
 
-app = func.FunctionApp()
+app = func.FunctionApp(http_auth_level=func.AuthLevel.ANONYMOUS)
 
 
 app.register_blueprint(bp_pitches)
